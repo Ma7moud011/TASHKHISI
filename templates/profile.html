@@ -1,0 +1,416 @@
+{% extends 'base.html' %}
+{% block style %} 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+{% endblock %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash {{ category }} show">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="container">
+        <div class="profile-header">
+            <div class="profile-cover">
+                <div class="cover-overlay"></div>
+                <button class="change-cover" title="Change Cover Image">
+                    <i class="fas fa-camera"></i>
+                </button>
+            </div>
+            <div class="profile-avatar-container">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <button class="change-avatar" title="Change Profile Picture">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <input type="file" id="avatar-upload" class="file-upload" accept="image/*">
+                <input type="file" id="cover-upload" class="file-upload" accept="image/*">
+            </div>
+            <h1>{{ session.get('username') }}</h1>
+            <p class="profile-info">Manage your account settings and preferences</p>
+        </div>
+
+        <div class="tab-navigation">
+            <button class="tab-button active" data-tab="account">
+                <i class="fas fa-user"></i> Account
+            </button>
+            <button class="tab-button" data-tab="security">
+                <i class="fas fa-lock"></i> Security
+            </button>
+            <button class="tab-button" data-tab="preferences">
+                <i class="fas fa-cog"></i> Preferences
+            </button>
+            <button class="tab-button" data-tab="activity">
+                <i class="fas fa-history"></i> Activity
+            </button>
+        </div>
+
+        
+        <div class="tab-content active" id="account-tab">
+            
+            <div class="current-info">
+                <h2><i class="fas fa-info-circle"></i> Current Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Username</span>
+                        <span class="info-value">{{ session.get('username') }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ user.email }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Member Since</span>
+                        <span class="info-value">{{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="bg-white">
+                <h2><i class="fas fa-user-edit"></i> Update Username</h2>
+                <form action="{{ url_for('update_username') }}" method="POST" class="profile-form">
+                    <div class="form-group">
+                        <label for="username">New Username</label>
+                        <div class="input-group">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" name="username" id="username" value="{{ session.get('username') }}" placeholder="New Username" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-update">
+                        <i class="fas fa-save"></i> Update Username
+                    </button>
+                </form>
+            </div>
+
+            
+            <div class="bg-white">
+                <h2><i class="fas fa-envelope"></i> Update Email</h2>
+                <form action="{{ url_for('update_email') }}" method="POST" class="profile-form">
+                    <div class="form-group">
+                        <label for="email">New Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" name="email" id="email" value="{{ user.email }}" placeholder="New Email" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-update">
+                        <i class="fas fa-save"></i> Update Email
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        
+        <div class="tab-content" id="security-tab">
+            
+            <div class="bg-white">
+                <h2><i class="fas fa-lock"></i> Update Password</h2>
+                <form action="{{ url_for('update_password') }}" method="POST" class="profile-form">
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" name="current_password" id="current_password" placeholder="Current Password" required>
+                            <i class="fas fa-eye toggle-password"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-key input-icon"></i>
+                            <input type="password" name="new_password" id="new_password" placeholder="New Password" required>
+                            <i class="fas fa-eye toggle-password"></i>
+                        </div>
+                        <div class="password-strength" id="password-strength">
+                            <div class="strength-bar"></div>
+                            <span class="strength-text">Password Strength</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-update">
+                        <i class="fas fa-save"></i> Update Password
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white">
+                <h2><i class="fas fa-shield-alt"></i> Security Settings</h2>
+                <div class="profile-form">
+                    <div class="preference-item">
+                        <div class="preference-label">
+                            <i class="fas fa-bell"></i>
+                            <div>
+                                <div class="preference-title">Login Notifications</div>
+                                <div class="preference-description">Receive email notifications when your account is accessed from a new device</div>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="preference-item">
+                        <div class="preference-label">
+                            <i class="fas fa-user-shield"></i>
+                            <div>
+                                <div class="preference-title">Two-Factor Authentication</div>
+                                <div class="preference-description">Add an extra layer of security to your account</div>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="tab-content" id="preferences-tab">
+            <div class="bg-white preferences-section">
+                <h2><i class="fas fa-cog"></i> Application Preferences</h2>
+                <div class="profile-form">
+                    <div class="preference-item">
+                        <div class="preference-label">
+                            <i class="fas fa-moon"></i>
+                            <div>
+                                <div class="preference-title">Dark Mode</div>
+                                <div class="preference-description">Switch between light and dark theme</div>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="preference-item">
+                        <div class="preference-label">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <div class="preference-title">Email Notifications</div>
+                                <div class="preference-description">Receive email updates about your account</div>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="preference-item">
+                        <div class="preference-label">
+                            <i class="fas fa-language"></i>
+                            <div>
+                                <div class="preference-title">Language</div>
+                                <div class="preference-description">Choose your preferred language</div>
+                            </div>
+                        </div>
+                        <select class="form-select">
+                            <option value="en">English</option>
+                            <option value="ar">العربية</option>
+                            <option value="fr">Français</option>
+                            <option value="es">Español</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="tab-content" id="activity-tab">
+            <div class="bg-white activity-log">
+                <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Account Login</div>
+                        <div class="activity-time">Today at 10:30 AM</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Profile Updated</div>
+                        <div class="activity-time">Yesterday at 3:45 PM</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Password Changed</div>
+                        <div class="activity-time">July 15, 2023</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const defaultTab = document.querySelector('.tab-button[data-tab="account"]');
+            if (defaultTab) {
+                defaultTab.classList.add('active');
+                const defaultTabContent = document.getElementById('account-tab');
+                if (defaultTabContent) {
+                    defaultTabContent.classList.add('active');
+                }
+            }
+            
+            
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    
+                    
+                    this.classList.add('active');
+                    
+                    
+                    const tabId = this.getAttribute('data-tab') + '-tab';
+                    const tabContent = document.getElementById(tabId);
+                    if (tabContent) {
+                        tabContent.classList.add('active');
+                        
+                        
+                        setTimeout(() => {
+                            tabContent.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }, 100);
+                    }
+                });
+            });
+        });
+    
+        
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        });
+
+        
+        const passwordInput = document.getElementById('new_password');
+        if (passwordInput) {
+            const strengthBar = document.querySelector('.strength-bar');
+            const strengthText = document.querySelector('.strength-text');
+
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                
+                if (password.length >= 8) strength += 25;
+                if (password.match(/[A-Z]/)) strength += 25;
+                if (password.match(/[0-9]/)) strength += 25;
+                if (password.match(/[^A-Za-z0-9]/)) strength += 25;
+
+                strengthBar.style.width = strength + '%';
+                
+                if (strength <= 25) {
+                    strengthBar.style.backgroundColor = '#ff4444';
+                    strengthText.textContent = 'Weak';
+                } else if (strength <= 50) {
+                    strengthBar.style.backgroundColor = '#ffbb33';
+                    strengthText.textContent = 'Fair';
+                } else if (strength <= 75) {
+                    strengthBar.style.backgroundColor = '#00C851';
+                    strengthText.textContent = 'Good';
+                } else {
+                    strengthBar.style.backgroundColor = '#007E33';
+                    strengthText.textContent = 'Strong';
+                }
+            });
+        }
+        
+        
+        function showFlashMessage(message, type) {
+            
+            let flashContainer = document.querySelector('.flash-container');
+            if (!flashContainer) {
+                flashContainer = document.createElement('div');
+                flashContainer.className = 'flash-container';
+                document.body.appendChild(flashContainer);
+            }
+            
+            
+            const flashMessage = document.createElement('div');
+            flashMessage.className = `flash ${type}`;
+            flashMessage.textContent = message;
+            
+            
+            flashContainer.appendChild(flashMessage);
+            
+            
+            setTimeout(() => {
+                flashMessage.addEventListener('animationend', function(e) {
+                    if (e.animationName === 'flashFadeOut') {
+                        this.remove();
+                    }
+                });
+            }, 100);
+        }
+        
+        
+        
+        
+        
+        const avatarButton = document.querySelector('.change-avatar');
+        const avatarInput = document.getElementById('avatar-upload');
+        
+        if (avatarButton && avatarInput) {
+            avatarButton.addEventListener('click', () => {
+                avatarInput.click();
+            });
+            
+            avatarInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    showFlashMessage('Profile picture upload feature coming soon!', 'info');
+                }
+            });
+        }
+        
+        
+        const coverButton = document.querySelector('.change-cover');
+        const coverInput = document.getElementById('cover-upload');
+        
+        if (coverButton && coverInput) {
+            coverButton.addEventListener('click', () => {
+                coverInput.click();
+            });
+            
+            coverInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    showFlashMessage('Cover image upload feature coming soon!', 'info');
+                }
+            });
+        }
+    </script>
+{% endblock %} 

@@ -1,0 +1,265 @@
+:root {
+  
+  --animation-shadow: rgba(0, 123, 255, 0.1);
+  --animation-shadow-strong: rgba(0, 123, 255, 0.15);
+  --animation-accent-color: #007bff;
+  --animation-pulse-shadow: rgba(0, 123, 255, 0.4);
+  --animation-pulse-shadow-fade: rgba(0, 123, 255, 0);
+}
+
+
+[data-theme="dark"] {
+  --animation-shadow: rgba(0, 191, 255, 0.15);
+  --animation-shadow-strong: rgba(0, 191, 255, 0.25);
+  --animation-accent-color: #00BFFF;
+  --animation-pulse-shadow: rgba(0, 191, 255, 0.4);
+  --animation-pulse-shadow-fade: rgba(0, 191, 255, 0);
+}
+
+.scroll-animation {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease;
+}
+
+.scroll-animation.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+.scroll-animation.fade-left {
+  transform: translateX(-30px);
+}
+
+.scroll-animation.fade-left.fade-in {
+  transform: translateX(0);
+}
+
+.scroll-animation.fade-right {
+  transform: translateX(30px);
+}
+
+.scroll-animation.fade-right.fade-in {
+  transform: translateX(0);
+}
+
+.scroll-animation.fade-up {
+  transform: translateY(30px);
+}
+
+.scroll-animation.fade-up.fade-in {
+  transform: translateY(0);
+}
+
+.scroll-animation.fade-down {
+  transform: translateY(-30px);
+}
+
+.scroll-animation.fade-down.fade-in {
+  transform: translateY(0);
+}
+
+.scroll-animation.zoom-in {
+  transform: scale(0.9);
+}
+
+.scroll-animation.zoom-in.fade-in {
+  transform: scale(1);
+}
+
+
+.scroll-animation.delay-100 {
+  transition-delay: 0.1s;
+}
+
+.scroll-animation.delay-200 {
+  transition-delay: 0.2s;
+}
+
+.scroll-animation.delay-300 {
+  transition-delay: 0.3s;
+}
+
+.scroll-animation.delay-400 {
+  transition-delay: 0.4s;
+}
+
+.scroll-animation.delay-500 {
+  transition-delay: 0.5s;
+}
+
+
+.scroll-animation.bounce {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.scroll-animation.smooth {
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.scroll-animation.slow {
+  transition-duration: 1.2s;
+}
+
+.scroll-animation.fast {
+  transition-duration: 0.5s;
+}
+
+
+.get-started.scroll-animation {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.get-started.scroll-animation.fade-in {
+  transform: scale(1.05);
+  transition-duration: 1s;
+}
+
+.get-started.scroll-animation.fade-in:hover {
+  transform: scale(1.1) translateY(-5px);
+}
+
+.feature.scroll-animation.fade-in {
+  box-shadow: 0 10px 30px var(--animation-shadow);
+}
+
+
+.test.test-animate {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.test.test-animate.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+  box-shadow: 0 15px 35px var(--animation-shadow-strong);
+}
+
+.test.test-animate:hover {
+  transform: translateY(-10px);
+}
+
+.test.test-animate .feature-icon {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.test.test-animate:hover .feature-icon {
+  transform: scale(1.2) rotate(10deg);
+  color: var(--animation-accent-color);
+}
+
+.test.test-animate:nth-child(1) {
+  transition-delay: 0.1s;
+}
+
+.test.test-animate:nth-child(2) {
+  transition-delay: 0.2s;
+}
+
+.test.test-animate:nth-child(3) {
+  transition-delay: 0.3s;
+}
+
+.test.test-animate:nth-child(4) {
+  transition-delay: 0.4s;
+}
+
+.test.test-animate:nth-child(5) {
+  transition-delay: 0.5s;
+}
+
+
+.medical-tests.animate-section .test.test-animate {
+  animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.medical-tests.animate-section .test.test-animate:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.medical-tests.animate-section .test.test-animate:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.medical-tests.animate-section .test.test-animate:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.medical-tests.animate-section .test.test-animate:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.medical-tests.animate-section .test.test-animate:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.test.scroll-animation {
+  transition-duration: 0.7s;
+}
+
+.test.scroll-animation.fade-in {
+  box-shadow: 0 15px 35px var(--animation-shadow);
+}
+
+.why-point.scroll-animation {
+  transform: translateY(-5px);
+}
+
+.stat.scroll-animation {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stat.scroll-animation.fade-in span {
+  animation: countUp 1.5s ease forwards 0.3s;
+}
+
+@keyframes countUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.testimonial-card.scroll-animation.fade-in {
+  transform: translateY(-5px);
+}
+
+
+.scroll-animation.pulse.fade-in {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--animation-pulse-shadow);
+  }
+  70% {
+    box-shadow: 0 0 0 10px var(--animation-pulse-shadow-fade);
+  }
+  100% {
+    box-shadow: 0 0 0 0 var(--animation-pulse-shadow-fade);
+  }
+} 

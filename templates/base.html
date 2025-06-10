@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    
+    (function() {
+      const storedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', storedTheme);
+    })();
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+  {% block style %}{% endblock %}
+  <title>{% block title %}Tashkhisi{% endblock %}</title>
+  <style>
+    .theme-toggle {
+      margin-right: 15px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .theme-toggle-icon {
+      font-size: 22px;
+      color: var(--nav-link-color);
+      transition: all 0.3s ease;
+    }
+    
+    .theme-toggle:hover .theme-toggle-icon {
+      color: var(--nav-link-hover-color);
+      transform: rotate(30deg);
+    }
+    
+    @media (max-width: 768px) {
+      .theme-toggle {
+        margin-right: 10px;
+      }
+      
+      .theme-toggle-icon {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="{{ url_for('home_page') }}">
+        <img src="{{ url_for('static', filename='images/12.png') }}" alt="Tashkhisi Logo">
+      </a>
+    </div>
+    <nav>
+      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('home_page') }}"><i class="fas fa-home"></i> <span>Home</span></a></li>
+        <li><a href="{{ url_for('diagnose_page') }}"><i class="fas fa-stethoscope"></i> <span>Diagnose</span></a></li>
+        <li><a href="{{ url_for('illness_page') }}"><i class="fas fa-info-circle"></i> <span>Illness Guide</span></a></li>
+        <li><a href="{{ url_for('history_page') }}"><i class="fas fa-history"></i> <span>History</span></a></li>
+        <li><a href="{{ url_for('home_page') }}#medical-tests" class="medical-tests-link"><i class="fas fa-vial"></i> <span>Medical Tests</span></a></li>
+        <li><a href="#footer" class="contact-link"><i class="fas fa-envelope"></i> <span>Contact Us</span></a></li>
+      </ul>
+    </nav>
+    <div class="auth-buttons">
+      <div class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+        <i class="fas fa-moon theme-toggle-icon" id="theme-toggle-icon"></i>
+      </div>
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('profile_page') }}"><i class="fas fa-user"></i> <span>{{ session.get('username') }}</span></a>
+        <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Sign Out</span></a>
+      {% else %}
+        <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a>
+        <a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> <span>SignUp</span></a>
+      {% endif %}
+    </div>
+  </header>
+  
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script>
+    function toggleMenu() {
+      const navLinks = document.querySelector('.nav-links');
+      const menuToggle = document.querySelector('.menu-toggle');
+      const body = document.body;
+      
+      navLinks.classList.toggle('active');
+      menuToggle.innerHTML = navLinks.classList.contains('active') ? '✖' : '☰';
+      
+      
+      if (navLinks.classList.contains('active')) {
+        body.style.overflow = 'hidden';
+        
+        
+        setTimeout(() => {
+          navLinks.classList.add('items-visible');
+        }, 50);
+      } else {
+        body.style.overflow = '';
+        navLinks.classList.remove('items-visible');
+      }
+    }
+
+    
+    function adjustMainContentPadding() {
+      const header = document.querySelector('header');
+      const mainContent = document.querySelector('.main-content');
+      const headerHeight = header.offsetHeight;
+      mainContent.style.paddingTop = `${headerHeight + 20}px`;
+    }
+
+    
+    function handleNavbarScroll() {
+      const header = document.querySelector('header');
+      let lastScrollTop = 0;
+      let scrollThreshold = 50; 
+      
+      window.addEventListener('scroll', function() {
+        
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks.classList.contains('active')) {
+          return;
+        }
+        
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        
+        if (scrollTop < scrollThreshold) {
+          header.classList.remove('nav-hidden');
+          return;
+        }
+        
+        
+        if (scrollTop > lastScrollTop) {
+          
+          header.classList.add('nav-hidden');
+        } else {
+          
+          header.classList.remove('nav-hidden');
+        }
+        
+        lastScrollTop = scrollTop;
+      }, { passive: true }); 
+    }
+
+    
+    function initScrollAnimations() {
+      const animatedElements = document.querySelectorAll('.scroll-animation');
+      const testCards = document.querySelectorAll('.test.test-animate');
+      
+      
+      if (animatedElements.length === 0 && testCards.length === 0) return;
+      
+      
+      function isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        
+        
+        const threshold = 0.2;
+        
+        return (
+          rect.top <= windowHeight * (1 - threshold) &&
+          rect.bottom >= windowHeight * threshold
+        );
+      }
+      
+      
+      function checkVisibleElements() {
+        animatedElements.forEach(element => {
+          if (isElementInViewport(element)) {
+            element.classList.add('fade-in');
+          } else if (element.hasAttribute('data-repeat')) {
+            
+            element.classList.remove('fade-in');
+          }
+        });
+        
+        
+        testCards.forEach(card => {
+          if (isElementInViewport(card)) {
+            card.classList.add('animate-in');
+          } else if (card.hasAttribute('data-repeat')) {
+            card.classList.remove('animate-in');
+          }
+        });
+      }
+      
+      
+      checkVisibleElements();
+      
+      
+      window.addEventListener('scroll', checkVisibleElements, { passive: true });
+      
+      
+      window.addEventListener('resize', checkVisibleElements, { passive: true });
+    }
+    
+    
+    function initMedicalTestsAnimation() {
+      
+      const medicalTestsLink = document.querySelector('.medical-tests-link');
+      
+      if (medicalTestsLink) {
+        medicalTestsLink.addEventListener('click', function(event) {
+          
+          const isHomePage = window.location.pathname === '/' || 
+                             window.location.pathname === '/home' || 
+                             window.location.href.includes('home_page');
+          
+          if (!isHomePage) {
+            
+            return;
+          }
+          
+          
+          event.preventDefault();
+          
+          
+          const medicalTestsSection = document.getElementById('medical-tests');
+          
+          if (medicalTestsSection) {
+            
+            medicalTestsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            
+            medicalTestsSection.classList.remove('animate-section');
+            
+            
+            const testCards = medicalTestsSection.querySelectorAll('.test.test-animate');
+            testCards.forEach(card => {
+              card.classList.remove('animate-in');
+            });
+            
+            
+            setTimeout(() => {
+              medicalTestsSection.classList.add('animate-section');
+            }, 300);
+          }
+        });
+      }
+    }
+
+    
+    function initContactScroll() {
+      const contactLink = document.querySelector('.contact-link');
+      
+      if (contactLink) {
+        contactLink.addEventListener('click', function(event) {
+          event.preventDefault();
+          
+          const footer = document.getElementById('footer');
+          if (footer) {
+            
+            footer.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            
+            const isHomePage = window.location.pathname === '/' || 
+                               window.location.pathname === '/home' || 
+                               window.location.href.includes('home_page');
+            
+            if (!isHomePage) {
+              
+              window.location.href = '/#footer';
+            }
+          }
+        });
+      }
+    }
+
+    function initThemeToggle() {
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeToggleIcon = document.getElementById('theme-toggle-icon');
+      const storedTheme = localStorage.getItem('theme') || 'light';
+      
+      
+      if (storedTheme === 'dark') {
+        themeToggleIcon.classList.remove('fa-moon');
+        themeToggleIcon.classList.add('fa-sun');
+      }
+      
+      
+      themeToggle.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        
+        localStorage.setItem('theme', newTheme);
+        
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        
+        
+        if (newTheme === 'dark') {
+          themeToggleIcon.classList.remove('fa-moon');
+          themeToggleIcon.classList.add('fa-sun');
+        } else {
+          themeToggleIcon.classList.remove('fa-sun');
+          themeToggleIcon.classList.add('fa-moon');
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      adjustMainContentPadding();
+      handleNavbarScroll();
+      initScrollAnimations();
+      initMedicalTestsAnimation();
+      initContactScroll();
+      initThemeToggle();
+      
+      
+      window.addEventListener('resize', adjustMainContentPadding);
+
+      
+      const navLinks = document.querySelectorAll('.nav-links li a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          const nav = document.querySelector('.nav-links');
+          const menuToggle = document.querySelector('.menu-toggle');
+          const body = document.body;
+          
+          if (nav.classList.contains('active')) {
+            nav.classList.remove('active');
+            nav.classList.remove('items-visible');
+            menuToggle.innerHTML = '☰';
+            body.style.overflow = '';
+          }
+        });
+      });
+      
+      
+      document.addEventListener('click', function(event) {
+        const nav = document.querySelector('.nav-links');
+        const menuToggle = document.querySelector('.menu-toggle');
+        
+        if (nav.classList.contains('active') && 
+            !nav.contains(event.target) && 
+            event.target !== menuToggle) {
+          nav.classList.remove('active');
+          nav.classList.remove('items-visible');
+          menuToggle.innerHTML = '☰';
+          document.body.style.overflow = '';
+        }
+      });
+    });
+  </script>
+  {% block script %}{% endblock %}
+</body>
+</html>

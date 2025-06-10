@@ -1,0 +1,183 @@
+:root {
+  
+  --body-bg: linear-gradient(to right, #00BFFF, #eef7f6);
+  --text-color: #333;
+  --container-bg: #ffffff;
+  --container-shadow: rgba(0, 0, 0, 0.1);
+  --heading-color: #004c70;
+  --label-color: #005580;
+  --select-bg: #eef7f6;
+  --select-border: #b0d8ed;
+  --select-text: #004c70;
+  --button-bg: #007bff;
+  --button-hover-bg: #0056b3;
+  --button-text: #ffffff;
+  --record-bg: #f9fbfc;
+  --record-border: #cde4ed;
+  --record-shadow: rgba(0, 0, 0, 0.08);
+  --record-heading: #007bff;
+  --record-text: #333333;
+  --record-list: #444444;
+  --hr-color: #cde4ed;
+  --delete-button-bg: #f44336;
+  --delete-button-hover-bg: #d32f2f;
+  --delete-button-text: #ffffff;
+  --badge-bg: #eef7f6;
+  --badge-text: #007bff;
+  --badge-border: #b0d8ed;
+  --badge-icon: #007bff;
+  --diagnosis-name-color: #007bff;
+  --diagnosis-name-shadow: rgba(0, 0, 0, 0.05);
+  --diagnosis-icon-color: #007bff;
+}
+
+
+[data-theme="dark"] {
+  --body-bg: linear-gradient(to right, #0f2027, #203a43);
+  --text-color: #e4e6eb;
+  --container-bg: #2a2a2a;
+  --container-shadow: rgba(0, 0, 0, 0.3);
+  --heading-color: #00BFFF;
+  --label-color: #00BFFF;
+  --select-bg: #3a3a3a;
+  --select-border: #555;
+  --select-text: #e4e6eb;
+  --button-bg: #00BFFF;
+  --button-hover-bg: #0091c2;
+  --button-text: #ffffff;
+  --record-bg: #3a3a3a;
+  --record-border: #555;
+  --record-shadow: rgba(0, 0, 0, 0.2);
+  --record-heading: #00BFFF;
+  --record-text: #e4e6eb;
+  --record-list: #b0b3b8;
+  --hr-color: #555;
+  --delete-button-bg: #f44336;
+  --delete-button-hover-bg: #d32f2f;
+  --delete-button-text: #ffffff;
+  --badge-bg: #3a3a3a;
+  --badge-text: #00BFFF;
+  --badge-border: #555;
+  --badge-icon: #00BFFF;
+  --diagnosis-name-color: #00BFFF;
+  --diagnosis-name-shadow: rgba(0, 0, 0, 0.2);
+  --diagnosis-icon-color: #00BFFF;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--body-bg);
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+
+.container {
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: var(--container-bg);
+    border-radius: 10px;
+    box-shadow: 0 6px 10px var(--container-shadow);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+h1 {
+    text-align: center;
+    color: var(--heading-color);
+    font-size: 28px;
+    margin-bottom: 20px;
+    transition: color 0.3s ease;
+}
+
+
+form {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+form label {
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 12px;
+    color: var(--label-color);
+    transition: color 0.3s ease;
+}
+
+form select {
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid var(--select-border);
+    background-color: var(--select-bg);
+    color: var(--select-text);
+    transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+}
+
+form button {
+    padding: 8px 20px;
+    font-size: 16px;
+    color: var(--button-text);
+    background-color: var(--button-bg);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+form button:hover {
+    background-color: var(--button-hover-bg);
+}
+
+
+.record {
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: var(--record-bg);
+    border-radius: 8px;
+    border: 1px solid var(--record-border);
+    box-shadow: 0 2px 4px var(--record-shadow);
+    transition: background-color 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.record h3 {
+    color: var(--record-heading);
+    margin-bottom: 12px;
+    font-size: 20px;
+    transition: color 0.3s ease;
+}
+
+.record p {
+    margin: 6px 0;
+    color: var(--record-text);
+    font-size: 16px;
+    line-height: 1.6;
+    transition: color 0.3s ease;
+}
+
+.record ul {
+    margin: 12px 0 0 20px;
+    padding-left: 0;
+    list-style-type: disc;
+    color: var(--record-list);
+    transition: color 0.3s ease;
+}
+
+.record ul li {
+    margin-bottom: 8px;
+    font-size: 15px;
+    transition: color 0.3s ease;
+}
+
+
+hr {
+    border: none;
+    border-top: 1px solid var(--hr-color);
+    margin: 25px 0;
+    transition: border-color 0.3s ease;
+}
+

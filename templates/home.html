@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash {{ category }} show">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+  {% endwith %}
+
+  <div>
+    
+    <div class="fixed-scroll-indicator" id="scrollIndicator">
+      <i class="fas fa-heartbeat scroll-icon-top"></i>
+      <span class="scroll-text">more</span>
+      <div class="drag-lines">
+        <div class="drag-line"></div>
+        <div class="drag-line"></div>
+        <div class="drag-line"></div>
+      </div>
+      <i class="fas fa-chevron-down scroll-arrow"></i>
+    </div>
+    
+    <section class="hero parallax-hero">
+      <div class="content">
+        <h1 class="welcome-heading scroll-animation fade-down">
+          <span class="welcome-text">Welcome to</span>
+          <span class="brand-name">TASHKHISI</span>
+        </h1>
+        <p class="subtitle scroll-animation fade-up delay-200">Your smart medical assistant for fast, reliable, and AI-powered health insights.</p>
+        <a href="/diagnose" class="get-started scroll-animation zoom-in delay-400"><i class="fa-solid fa-stethoscope"></i> Start Diagnosis</a>
+        <div class="features">
+          <div class="feature feature-visible">
+            <i class="fas fa-stethoscope feature-icon"></i>
+            <h3>Symptom Checker</h3>
+            <p>Input your symptoms and get an AI-powered diagnosis suggestion.</p>
+          </div>
+          <div class="feature feature-visible">
+            <i class="fas fa-book-medical feature-icon"></i>
+            <h3>Disease Database</h3>
+            <p>Access a comprehensive disease database for accurate information.</p>
+          </div>
+          <div class="feature feature-visible">
+            <i class="fas fa-diagnoses feature-icon"></i>
+            <h3>AI-Powered Tests</h3>
+            <p>Utilize advanced AI-driven tests for heart, diabetes, fetal health, liver, and malaria detection.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+    <svg class="svg-wave" viewBox="0 0 1440 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#e3f0ff" fill-opacity="1" d="M0,32L48,42.7C96,53,192,75,288,80C384,85,480,75,576,58.7C672,43,768,21,864,16C960,11,1056,21,1152,32C1248,43,1344,53,1392,58.7L1440,64L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path></svg>
+
+    
+    <section class="medical-tests" id="medical-tests">
+      <h2 class="scroll-animation fade-up">Medical Tests <span class="badge-popular">Most Popular</span></h2>
+      <p class="tests-intro scroll-animation fade-up delay-100">Explore our advanced medical tests powered by AI.</p>
+      <div class="tests-container">
+        <div class="test test-animate scroll-animation fade-left delay-100"><span class="badge-hot">Hot</span>
+          <div class="test-content">
+            <i class="fas fa-heart feature-icon"></i>
+            <h3>Heart Disease Prediction</h3>
+            <p>Analyze risks of heart disease.</p>
+          </div>
+          <div class="test-footer">
+            <a href="/heart" class="test-link"><span>Start Test</span> <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="test test-animate scroll-animation fade-up delay-200">
+          <div class="test-content">
+            <i class="fas fa-syringe feature-icon"></i>
+            <h3>Diabetes Prediction</h3>
+            <p>Assess your diabetes risk.</p>
+          </div>
+          <div class="test-footer">
+            <a href="/diabetes" class="test-link"><span>Start Test</span> <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="test test-animate scroll-animation fade-right delay-300"><span class="badge-new">New</span>
+          <div class="test-content">
+            <i class="fas fa-baby feature-icon"></i>
+            <h3>Fetal Health</h3>
+            <p>Evaluate fetal health status.</p>
+          </div>
+          <div class="test-footer">
+            <a href="/fetal" class="test-link"><span>Start Test</span> <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="test test-animate scroll-animation fade-left delay-400">
+          <div class="test-content">
+            <i class="fas fa-droplet feature-icon"></i>
+            <h3>Liver Disease Prediction</h3>
+            <p>Check liver function risks.</p>
+          </div>
+          <div class="test-footer">
+            <a href="/liver" class="test-link"><span>Start Test</span> <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="test test-animate scroll-animation fade-up delay-500">
+          <div class="test-content">
+            <i class="fas fa-microscope feature-icon"></i>
+            <h3>Malaria Detection</h3>
+            <p>Detect malaria from cell images.</p>
+          </div>
+          <div class="test-footer">
+            <a href="/malaria" class="test-link"><span>Start Test</span> <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="why-choose">
+      <div class="why-choose-title scroll-animation fade-down">Why Choose TASHKHISI?</div>
+      <div class="why-choose-points">
+        <div class="why-point scroll-animation fade-right delay-100">
+          <i class="fas fa-brain"></i>
+          <span>AI Intelligence</span>
+          <p>Cutting-edge artificial intelligence for accurate and fast results.</p>
+        </div>
+        <div class="why-point scroll-animation fade-up delay-200">
+          <i class="fas fa-mobile-alt"></i>
+          <span>Easy & Accessible</span>
+          <p>Simple interface, works on all devices, and available 24/7.</p>
+        </div>
+        <div class="why-point scroll-animation fade-left delay-300">
+          <i class="fas fa-user-shield"></i>
+          <span>Privacy First</span>
+          <p>Your data is safe, secure, and never shared.</p>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="stats-bar">
+      <div class="stat scroll-animation fade-up delay-100"><i class="fas fa-user-md"></i><span>+10,000</span><p>Diagnoses</p></div>
+      <div class="stat scroll-animation fade-up delay-200"><i class="fas fa-disease"></i><span>+100</span><p>Supported Diseases</p></div>
+      <div class="stat scroll-animation fade-up delay-300"><i class="fas fa-bolt"></i><span>&lt;1s</span><p>Avg. Response</p></div>
+      <div class="stat scroll-animation fade-up delay-400"><i class="fas fa-smile"></i><span>98%</span><p>User Satisfaction</p></div>
+    </section>
+
+    
+    <section class="testimonials">
+      <h2 class="testimonials-title scroll-animation fade-down">What Our Users Say</h2>
+      <div class="testimonials-cards">
+        <div class="testimonial-card stagger-1 scroll-animation fade-left delay-100">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="testimonial-avatar">
+          <div class="testimonial-name">Ahmed S.</div>
+          <div class="testimonial-text">"The diagnosis was fast and accurate. I felt reassured and the interface is very easy!"</div>
+        </div>
+        <div class="testimonial-card stagger-2 scroll-animation fade-up delay-200">
+          <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="testimonial-avatar">
+          <div class="testimonial-name">Sara M.</div>
+          <div class="testimonial-text">"I love the AI-powered tests. The site is modern and works perfectly on my phone."</div>
+        </div>
+        <div class="testimonial-card stagger-3 scroll-animation fade-right delay-300">
+          <img src="https://randomuser.me/api/portraits/men/65.jpg" alt="User" class="testimonial-avatar">
+          <div class="testimonial-name">Mohamed A.</div>
+          <div class="testimonial-text">"Great privacy and support. I recommend Tashkhisi to all my friends!"</div>
+        </div>
+      </div>
+    </section>
+
+    
+    <footer class="main-footer" id="footer">
+      <div class="footer-content">
+        <div class="footer-logo scroll-animation fade-right">
+          <img src="{{ url_for('static', filename='images/12.png') }}" alt="Tashkhisi Logo" height="40">
+          <p class="footer-slogan">Your Smart Medical Assistant</p>
+        </div>
+        
+        <div class="footer-sections">
+          <div class="footer-section scroll-animation fade-up delay-200">
+            <h3>Contact Us</h3>
+            <div class="contact-info">
+              <p><i class="fas fa-map-marker-alt"></i> 123 Medical Center St, Cairo, Egypt</p>
+              <p><i class="fas fa-phone"></i> +20 123 456 7890</p>
+              <p><i class="fas fa-envelope"></i> info@tashkhisi.com</p>
+              <p><i class="fas fa-clock"></i> Available 24/7</p>
+            </div>
+            <div class="footer-social">
+              <a href="#"><i class="fab fa-facebook-f"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#"><i class="fab fa-whatsapp"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="newsletter-section scroll-animation fade-up delay-300">
+        <h3>Subscribe to Our Newsletter</h3>
+        <p>Stay updated with our latest medical insights and features</p>
+        <form class="newsletter-form">
+          <input type="email" placeholder="Your Email Address" required>
+          <button type="submit"><i class="fas fa-paper-plane"></i> Subscribe</button>
+        </form>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2024 Tashkhisi. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">FAQ</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    
+    
+    let lastScrollTop = 0;
+    
+    window.addEventListener('scroll', function() {
+      const scrollIndicator = document.getElementById('scrollIndicator');
+      let st = window.pageYOffset || document.documentElement.scrollTop;
+      
+      
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollPosition = window.scrollY + windowHeight;
+      const buffer = 100; 
+      
+      if (scrollPosition >= documentHeight - buffer) {
+        
+        scrollIndicator.classList.add('scroll-end-hide');
+      } else {
+        scrollIndicator.classList.remove('scroll-end-hide');
+        
+        
+        if (st > lastScrollTop && st > 300) {
+          
+          scrollIndicator.classList.add('scroll-hide');
+        } else if (st < lastScrollTop) {
+          
+          scrollIndicator.classList.remove('scroll-hide');
+        }
+      }
+      
+      lastScrollTop = st <= 0 ? 0 : st;
+      
+      
+      if (window.innerWidth <= 768) {
+        const featureElements = document.querySelectorAll('.feature-visible');
+        featureElements.forEach(function(element) {
+          const elementTop = element.getBoundingClientRect().top;
+          if (elementTop < windowHeight - 100) {
+            element.classList.add('animate-in');
+          }
+        });
+      }
+    });
+
+    
+    document.getElementById('scrollIndicator').addEventListener('click', function() {
+      const currentPosition = window.pageYOffset;
+      const windowHeight = window.innerHeight;
+      const nextSection = Math.ceil((currentPosition + 100) / windowHeight) * windowHeight;
+      
+      window.scrollTo({
+        top: nextSection,
+        behavior: 'smooth'
+      });
+    });
+    
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const scrollIndicator = document.getElementById('scrollIndicator');
+      setTimeout(function() {
+        scrollIndicator.style.opacity = '1';
+        scrollIndicator.style.transform = 'translateY(0)';
+      }, 1500);
+      
+      
+      if (window.innerWidth <= 768) {
+        const featureElements = document.querySelectorAll('.feature-visible');
+        featureElements.forEach(function(element) {
+          const elementTop = element.getBoundingClientRect().top;
+          if (elementTop < window.innerHeight - 100) {
+            element.classList.add('animate-in');
+          }
+        });
+      }
+    });
+  </script>
+{% endblock %}

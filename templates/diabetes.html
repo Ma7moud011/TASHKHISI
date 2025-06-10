@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block style %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/disease-pages.css') }}">
+{% endblock %}
+
+{% block title %}Diabetes Prediction{% endblock %}
+
+{% block content %}
+  <div class="container diabetes-card">
+    <h2>Diabetes Prediction</h2>
+    <form id="prediction-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="gender">Gender:</label>
+          <select id="gender" name="gender" required>
+            <option value="" disabled selected>Select Gender</option>
+            <option value="0">Female</option>
+            <option value="1">Male</option>
+            <option value="2">Other</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="age">Age (years):</label>
+          <input type="number" id="age" name="age" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="smoking_history">Smoking History:</label>
+          <select id="smoking_history" name="smoking_history" required>
+            <option value="" disabled selected>Select Smoking History</option>
+            <option value="0">No Info</option>
+            <option value="1">Current</option>
+            <option value="2">Ever</option>
+            <option value="3">Former</option>
+            <option value="4">Never</option>
+            <option value="5">Not Current</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="hypertension">Hypertension: 
+            <span class="tooltip" data-tooltip="Do you have high blood pressure? Example: Yes, No">?</span>
+          </label>
+          <select id="hypertension" name="hypertension" required>
+            <option value="" disabled selected>Select Option</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="heart_disease">Heart Disease: 
+            <span class="tooltip" data-tooltip="Do you have any heart disease? Example: Yes, No">?</span>
+          </label>
+          <select id="heart_disease" name="heart_disease" required>
+            <option value="" disabled selected>Select Option</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="bmi">BMI (kg/m²): 
+            <span class="tooltip" data-tooltip="Enter your Body Mass Index. Example: 25.4">?</span>
+          </label>
+          <input type="number" id="bmi" name="bmi" step="0.1" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="hba1c">HbA1c Level (%): 
+            <span class="tooltip" data-tooltip="Enter your HbA1c level, which represents your average blood sugar over the past three months. Example: 5.7%">?</span>
+          </label>
+          <input type="number" id="hba1c" name="HbA1c_level" step="0.1" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="blood_glucose">Blood Glucose Level (mg/dL): 
+            <span class="tooltip" data-tooltip="Enter your blood glucose level. Example: 110">?</span>
+          </label>
+          <input type="number" id="blood_glucose" name="blood_glucose_level" required>
+        </div>
+        
+        <button type="submit" class="full-width">Predict</button>
+      </div>
+    </form>
+  </div>
+  
+  <div id="result-modal" class="result-modal">
+    <div id="result-container" class="result-container">
+      <button class="close-btn" onclick="document.getElementById('result-modal').style.display='none'">×</button>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    
+    document.getElementById("result-modal").addEventListener("click", function(e) {
+      if (e.target === this) {
+        this.style.display = "none";
+      }
+    });
+    
+    document.getElementById("prediction-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      
+      const formData = {
+        gender: document.getElementById("gender").value,
+        age: document.getElementById("age").value,
+        smoking_history: document.getElementById("smoking_history").value,
+        hypertension: document.getElementById("hypertension").value,
+        heart_disease: document.getElementById("heart_disease").value,
+        bmi: document.getElementById("bmi").value,
+        HbA1c_level: document.getElementById("hba1c").value,
+        blood_glucose_level: document.getElementById("blood_glucose").value
+      };
+      
+      
+      const resultModal = document.getElementById("result-modal");
+      const resultContainer = document.getElementById("result-container");
+      
+      resultContainer.innerHTML = `
+        <button class="close-btn" onclick="document.getElementById('result-modal').style.display='none'">×</button>
+        <div class="loader"></div>
+        <p class="clarify">Processing your data...</p>
+      `;
+      resultContainer.className = 'result-container';
+      resultModal.style.display = "flex";
+      
+      try {
+        const response = await fetch("/diabetes_predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        const hasRisk = result.error ? true : result.prediction ? true : false;
+        const predictionClass = hasRisk ? 'result-positive' : 'result-negative';
+        const predictionText = result.error ? `Error: ${result.error}` 
+                            : result.prediction ? 'Potential risk of diabetes. Consult a doctor.' 
+                            : 'No signs of diabetes.';
+        
+        const genderText = formData.gender == "1" ? "Male" : formData.gender == "0" ? "Female" : "Other";
+        const smokingText = document.getElementById('smoking_history').options[document.getElementById('smoking_history').selectedIndex].text;
+        const hyperText = formData.hypertension == "1" ? "Yes" : "No";
+        const heartText = formData.heart_disease == "1" ? "Yes" : "No";
+        
+        const iconHtml = hasRisk ? 
+          '<span class="result-icon error"><i class="fas fa-exclamation-triangle"></i></span>' :
+          '<span class="result-icon success"><i class="fas fa-check-circle"></i></span>';
+        
+        resultContainer.innerHTML = `
+          <button class="close-btn" onclick="document.getElementById('result-modal').style.display='none'">×</button>
+          ${iconHtml}
+          <h2>Diabetes Prediction Result</h2>
+          <table class="result-table">
+            <tr><th>Field</th><th>Value</th></tr>
+            <tr><td>Gender</td><td>${genderText}</td></tr>
+            <tr><td>Age</td><td>${formData.age} years</td></tr>
+            <tr><td>Smoking History</td><td>${smokingText}</td></tr>
+            <tr><td>Hypertension</td><td>${hyperText}</td></tr>
+            <tr><td>Heart Disease</td><td>${heartText}</td></tr>
+            <tr><td>BMI</td><td>${formData.bmi} kg/m²</td></tr>
+            <tr><td>HbA1c Level</td><td>${formData.HbA1c_level} %</td></tr>
+            <tr><td>Blood Glucose Level</td><td>${formData.blood_glucose_level} mg/dL</td></tr>
+          </table>
+          <hr>
+          <p class="main-result">Assessment:</p>
+          <p class="${predictionClass}">${predictionText}</p>
+        `;
+        
+        resultContainer.className = hasRisk ? 'result-container error' : 'result-container success';
+      } catch (error) {
+        resultContainer.innerHTML = `
+          <button class="close-btn" onclick="document.getElementById('result-modal').style.display='none'">×</button>
+          <span class="result-icon error"><i class="fas fa-times-circle"></i></span>
+          <p class="main-result">Error Occurred</p>
+          <p class="clarify">Failed to fetch prediction. Please try again later.</p>
+        `;
+        resultContainer.className = 'result-container error';
+      }
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,237 @@
+:root {
+  
+  --body-bg: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+  --text-color: #333;
+  --heading-color: #1565c0;
+  --heading-shadow: rgba(0, 0, 0, 0.1);
+  --select-wrapper-bg: #ffffff;
+  --select-wrapper-shadow: rgba(33, 150, 243, 0.1);
+  --select-wrapper-border: #e3f2fd;
+  --loading-text-color: #1976d2;
+  --loading-icon-color: #2196f3;
+  --illness-details-bg: #ffffff;
+  --illness-details-shadow: rgba(33, 150, 243, 0.1);
+  --illness-details-border: #e3f2fd;
+  --illness-section-bg: #f8fbff;
+  --illness-section-border: #e3f2fd;
+  --illness-section-hover-shadow: rgba(33, 150, 243, 0.08);
+  --section-title-color: #1976d2;
+  --section-content-color: #37474f;
+  --select2-selection-border: #e3f2fd;
+  --select2-selection-text: #1976d2;
+  --select2-dropdown-bg: #ffffff;
+  --select2-dropdown-text: #333;
+  --select2-highlighted-bg: #e3f2fd;
+  --select2-highlighted-text: #1976d2;
+  --symptom-badge-bg: #e3f2fd;
+  --symptom-badge-border: #bbdefb;
+  --symptom-badge-text: #1976d2;
+  --symptom-badge-icon: #1976d2;
+}
+
+
+[data-theme="dark"] {
+  --body-bg: linear-gradient(135deg, #0f2027 0%, #203a43 100%);
+  --text-color: #e4e6eb;
+  --heading-color: #00BFFF;
+  --heading-shadow: rgba(0, 0, 0, 0.2);
+  --select-wrapper-bg: #2a2a2a;
+  --select-wrapper-shadow: rgba(0, 0, 0, 0.3);
+  --select-wrapper-border: #555;
+  --loading-text-color: #00BFFF;
+  --loading-icon-color: #00BFFF;
+  --illness-details-bg: #2a2a2a;
+  --illness-details-shadow: rgba(0, 0, 0, 0.3);
+  --illness-details-border: #555;
+  --illness-section-bg: #3a3a3a;
+  --illness-section-border: #555;
+  --illness-section-hover-shadow: rgba(0, 191, 255, 0.15);
+  --section-title-color: #00BFFF;
+  --section-content-color: #e4e6eb;
+  --select2-selection-border: #555;
+  --select2-selection-text: #00BFFF;
+  --select2-dropdown-bg: #2a2a2a;
+  --select2-dropdown-text: #e4e6eb;
+  --select2-highlighted-bg: #3a3a3a;
+  --select2-highlighted-text: #00BFFF;
+  --symptom-badge-bg: #3a3a3a;
+  --symptom-badge-border: #555;
+  --symptom-badge-text: #00BFFF;
+  --symptom-badge-icon: #00BFFF;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--body-bg);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    color: var(--text-color);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+
+h1 {
+    text-align: center;
+    margin: 1.25rem 0;
+    color: var(--heading-color);
+    font-weight: bold;
+    font-size: 2.1rem;
+    text-shadow: 1px 1px 2px var(--heading-shadow);
+    white-space: normal;
+    transition: color 0.3s ease;
+}
+
+
+.select-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 1.25rem auto;
+    display: block;
+    background-color: var(--select-wrapper-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--select-wrapper-shadow);
+    border: 1.5px solid var(--select-wrapper-border);
+    overflow: hidden;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+}
+
+
+#loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    display: none;
+    color: var(--loading-text-color);
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+#loading-spinner i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--loading-icon-color);
+    animation: spin 1s linear infinite;
+    transition: color 0.3s ease;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+#illness-details {
+    background: var(--illness-details-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 1.25rem auto;
+    box-shadow: 0 4px 20px var(--illness-details-shadow);
+    border: 1.5px solid var(--illness-details-border);
+    max-width: 800px;
+    width: 100%;
+    transition: background 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+}
+
+
+.illness-section {
+    margin-bottom: 1.5rem;
+    padding: 1.2rem;
+    background: var(--illness-section-bg);
+    border-radius: 12px;
+    border: 1px solid var(--illness-section-border);
+    transition: all 0.3s ease, background 0.3s ease, border 0.3s ease;
+}
+
+.illness-section:hover {
+    box-shadow: 0 4px 15px var(--illness-section-hover-shadow);
+    transform: translateY(-2px);
+}
+
+.section-title {
+    color: var(--section-title-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.section-content {
+    color: var(--section-content-color);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    white-space: pre-line;
+    transition: color 0.3s ease;
+}
+
+
+[dir="rtl"] .section-title i {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+[dir="rtl"] .illness-name i {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+
+@media (max-width: 768px) {
+    .select-wrapper {
+        width: 90%;
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    #illness-details {
+        padding: 1.5rem;
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+    }
+
+    .section-content {
+        font-size: 1rem;
+    }
+}
+
+
+@media print {
+    body {
+        background: none;
+    }
+
+    .select-wrapper,
+    #loading-spinner,
+    .search-tips {
+        display: none !important;
+    }
+
+    #illness-details {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        padding: 1rem;
+    }
+
+    .illness-section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}

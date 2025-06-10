@@ -1,0 +1,629 @@
+{% extends 'base.html' %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/illness guide.css') }}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    body {
+        min-height: 100vh;
+        background: var(--body-bg);
+        background-attachment: fixed;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+    }
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 15px;
+    }
+    .page-title {
+        color: var(--heading-color);
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 8px var(--heading-shadow);
+    }
+    .page-description {
+        color: var(--heading-color);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 700px;
+        margin: 0 auto;
+        font-weight: 500;
+    }
+    .search-section {
+        background: var(--select-wrapper-bg);
+        padding: 25px;
+        border-radius: 18px;
+        box-shadow: 0 4px 20px var(--select-wrapper-shadow);
+        margin-bottom: 30px;
+        transition: box-shadow 0.3s, background 0.3s;
+        border: 1px solid var(--select-wrapper-border);
+    }
+    .search-section:focus-within, .search-section:hover {
+        box-shadow: 0 8px 32px var(--select-wrapper-shadow);
+    }
+    .select2-container .select2-selection--single {
+        height: 55px;
+        padding: 12px 15px;
+        font-size: 16px;
+        border: 2px solid var(--select-wrapper-border);
+        border-radius: 12px;
+        background-color: var(--select-wrapper-bg);
+        transition: border 0.3s, background 0.3s;
+    }
+    .select2-container .select2-selection--single:hover {
+        border-color: var(--section-title-color);
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 30px;
+        color: var(--section-title-color);
+        font-weight: 600;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 53px;
+        right: 12px;
+    }
+    .select2-dropdown {
+        border: 2px solid var(--select-wrapper-border);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px var(--select-wrapper-shadow);
+        background-color: var(--select-wrapper-bg);
+    }
+    .select2-results__option {
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--illness-section-border);
+        transition: background 0.2s;
+        color: var(--text-color);
+    }
+    .select2-results__option:last-child {
+        border-bottom: none;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--illness-section-bg);
+        color: var(--section-title-color);
+    }
+    .illness-option {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .illness-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--illness-section-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .illness-icon i {
+        color: var(--section-title-color);
+        font-size: 20px;
+    }
+    .illness-info {
+        flex: 1;
+    }
+    .illness-name {
+        font-weight: 600;
+        color: var(--section-title-color);
+        margin-bottom: 4px;
+        font-size: 16px;
+    }
+    #illness-details {
+        background: var(--illness-details-bg);
+        border-radius: 18px;
+        box-shadow: 0 4px 20px var(--illness-details-shadow);
+        padding: 30px;
+        display: none;
+        margin-bottom: 30px;
+        border: 1px solid var(--illness-details-border);
+    }
+    .illness-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--illness-details-border);
+    }
+    .illness-header-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--illness-section-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .illness-header-icon i {
+        color: var(--section-title-color);
+        font-size: 30px;
+    }
+    .illness-header-info {
+        flex: 1;
+    }
+    .illness-header-name {
+        font-size: 24px;
+        color: var(--section-title-color);
+        margin-bottom: 10px;
+        font-weight: 800;
+    }
+    .illness-section {
+        margin-bottom: 25px;
+    }
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+        color: var(--section-title-color);
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+    .section-content {
+        color: var(--section-content-color);
+        line-height: 1.6;
+        font-size: 16px;
+        background: var(--illness-section-bg);
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid var(--section-title-color);
+    }
+    #loading-spinner {
+        text-align: center;
+        padding: 40px;
+        color: var(--loading-text-color);
+    }
+    #loading-spinner i {
+        font-size: 40px;
+        margin-bottom: 15px;
+        color: var(--loading-icon-color);
+    }
+    .symptom-badge {
+        display: inline-flex;
+        align-items: center;
+        background: var(--illness-section-bg);
+        color: var(--section-title-color);
+        border-radius: 20px;
+        padding: 6px 14px 6px 8px;
+        margin: 4px 6px 4px 0;
+        font-size: 0.97em;
+        font-weight: 500;
+        gap: 7px;
+        box-shadow: 0 1px 4px var(--select-wrapper-shadow);
+        border: 1px solid var(--illness-section-border);
+        transition: background 0.3s, color 0.3s, border 0.3s;
+    }
+    .symptom-badge i {
+        font-size: 1em;
+        margin-right: 2px;
+        color: var(--section-title-color);
+    }
+    @media (max-width: 1200px) {
+        .container {
+            max-width: 95%;
+            margin: 0 auto;
+        }
+    }
+    @media (max-width: 992px) {
+        .page-title {
+            font-size: 2rem;
+        }
+        .page-description {
+            font-size: 1rem;
+            max-width: 600px;
+        }
+        .search-section, #illness-details {
+            padding: 20px 15px;
+        }
+    }
+    @media (max-width: 768px) {
+        .container {
+            padding: 15px 0;
+            width: 100%;
+            max-width: 100%;
+        }
+        .search-section {
+            width: 100%;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: 0 4px 20px var(--select-wrapper-shadow);
+        }
+        .search-input-wrapper {
+            width: 100%;
+            margin: 0;
+            padding: 0 10px;
+        }
+        .select2-container {
+            width: 100% !important;
+        }
+        .page-header {
+            margin-bottom: 30px;
+        }
+        .page-title {
+            font-size: 2.2rem;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .page-description {
+            font-size: 1.1rem;
+            max-width: 100%;
+            padding: 0 15px;
+            margin-top: 15px;
+        }
+        .search-section, #illness-details {
+            padding: 20px 15px;
+            border-radius: 12px;
+        }
+        .illness-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 15px;
+            padding-bottom: 15px;
+        }
+        .illness-header-name {
+            font-size: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.1rem;
+        }
+        .section-content {
+            font-size: 0.95rem;
+            padding: 12px;
+        }
+        .symptom-badge {
+            font-size: 0.9em;
+            padding: 5px 12px 5px 6px;
+            margin: 3px 4px;
+        }
+    }
+    @media (max-width: 480px) {
+        .container {
+            padding: 10px 0;
+        }
+        .page-title {
+            font-size: 1.9rem;
+        }
+        .page-description {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .search-section {
+            padding: 20px 5px;
+            border-radius: 0;
+            margin-bottom: 20px;
+        }
+        .search-input-wrapper {
+            padding: 0 8px;
+        }
+        .select2-container .select2-selection--single {
+            height: 50px;
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+        .illness-header-icon {
+            width: 45px;
+            height: 45px;
+        }
+        .illness-header-icon i {
+            font-size: 22px;
+        }
+        .illness-header-name {
+            font-size: 1.6rem;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            gap: 5px;
+        }
+        .section-content {
+            font-size: 1rem;
+            padding: 12px;
+            line-height: 1.5;
+        }
+        .symptom-badge {
+            font-size: 0.85em;
+            padding: 4px 10px 4px 5px;
+            margin: 2px 3px;
+            gap: 5px;
+        }
+        .symptom-badge i {
+            font-size: 0.9em;
+        }
+        .search-input-wrapper {
+            margin: 0 5px;
+        }
+    }
+    @media (max-width: 360px) {
+        .page-title {
+            font-size: 1.7rem;
+        }
+        .page-description {
+            font-size: 0.95rem;
+        }
+        .illness-header-name {
+            font-size: 1.2rem;
+        }
+        .section-title {
+            font-size: 0.95rem;
+        }
+        .section-content {
+            font-size: 0.85rem;
+            padding: 8px;
+        }
+        .symptom-badge {
+            font-size: 0.8em;
+            padding: 3px 8px 3px 4px;
+        }
+        .select2-container .select2-selection--single {
+            height: 48px;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block title %}Illness Guide{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-book-medical"></i>
+            Medical Guide
+        </h1>
+        <p class="page-description">
+            Search our comprehensive database of medical conditions to learn about symptoms, treatments, and medical details
+        </p>
+    </div>
+
+    <div class="search-section">
+        <div class="search-input-wrapper">
+            <select id="illness-select">
+                <option value="" disabled selected>Search for a medical condition...</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="loading-spinner" style="display: none;">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading condition information...</p>
+    </div>
+
+    <div id="illness-details">
+        <div class="illness-header">
+            <div class="illness-header-icon">
+                <i class="fas fa-disease"></i>
+            </div>
+            <div class="illness-header-info">
+                <h2 class="illness-header-name" id="illness-name"></h2>
+            </div>
+        </div>
+
+        <div class="illness-section">
+            <h3 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Description
+            </h3>
+            <div class="section-content" id="illness-description"></div>
+        </div>
+
+        <div class="illness-section">
+            <h3 class="section-title">
+                <i class="fas fa-stethoscope"></i>
+                Medical Condition
+            </h3>
+            <div class="section-content" id="illness-medical-condition"></div>
+        </div>
+
+        <div class="illness-section">
+            <h3 class="section-title">
+                <i class="fas fa-pills"></i>
+                Treatment
+            </h3>
+            <div class="section-content" id="illness-treatment"></div>
+        </div>
+
+        <div class="illness-section">
+            <h3 class="section-title">
+                <i class="fas fa-exclamation-circle"></i>
+                Possible Symptoms
+            </h3>
+            <div class="section-content" id="illness-symptoms"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        
+        $('#illness-select').select2({
+            placeholder: "Search for a medical condition...",
+            width: '100%',
+            allowClear: true,
+            minimumInputLength: 0,
+            language: {
+                noResults: function() {
+                    return "No conditions found";
+                },
+                searching: function() {
+                    return "Searching...";
+                }
+            },
+            templateResult: formatIllness,
+            templateSelection: formatIllnessSelection
+        });
+
+        
+        function formatIllness(illness) {
+            if (!illness.id) return illness.text;
+            
+            return $(`
+                <div class="illness-option">
+                    <div class="illness-icon">
+                        <i class="fas fa-disease"></i>
+                    </div>
+                    <div class="illness-info">
+                        <div class="illness-name">${illness.text}</div>
+                    </div>
+                </div>
+            `);
+        }
+
+        function formatIllnessSelection(illness) {
+            if (!illness.id) return illness.text;
+            return illness.text;
+        }
+
+        
+        $.get('/api/illnesses', function(data) {
+            data.forEach(function(illness) {
+                $('#illness-select').append(new Option(illness.name, illness.id));
+            });
+        }).fail(function() {
+            alert("Failed to load conditions. Please try again.");
+        });
+
+        
+        $('#illness-select').on('select2:select', function(e) {
+            const illnessId = e.params.data.id;
+            
+            $('#loading-spinner').fadeIn(300);
+            $('#illness-details').hide();
+
+            $.get(`/api/illness-info/${illnessId}`, function(data) {
+                $('#loading-spinner').hide();
+                $('#illness-name').text(data.Name);
+                $('#illness-description').text(data.Description || 'No description available');
+                $('#illness-symptoms').text(data.PossibleSymptoms || 'No symptoms information available');
+                $('#illness-medical-condition').text(data.MedicalCondition || 'No medical condition information available');
+                $('#illness-treatment').text(data.TreatmentDescription || 'No treatment information available');
+                
+                
+                if (data.PossibleSymptoms) {
+                    const symptoms = data.PossibleSymptoms.split(',').map(s => s.trim()).filter(Boolean);
+                    if (symptoms.length) {
+                        const icons = [
+                            'fa-heartbeat', 'fa-head-side-cough', 'fa-thermometer-half', 'fa-dizzy',
+                            'fa-lungs', 'fa-allergies', 'fa-tint', 'fa-bug', 'fa-bolt', 'fa-eye',
+                            'fa-brain', 'fa-bone', 'fa-tooth', 'fa-hand-holding-medical', 'fa-band-aid'
+                        ];
+                        let html = '';
+                        symptoms.forEach((symptom, idx) => {
+                            const icon = icons[idx % icons.length];
+                            html += `<span class="symptom-badge"><i class="fas ${icon}"></i>${symptom}</span>`;
+                        });
+                        $('#illness-symptoms').html(html);
+                    } else {
+                        $('#illness-symptoms').text('No symptoms information available');
+                    }
+                } else {
+                    $('#illness-symptoms').text('No symptoms information available');
+                }
+                
+                $('#illness-details').fadeIn(300);
+            }).fail(function() {
+                alert("Failed to load condition details. Please try again.");
+                $('#loading-spinner').hide();
+            });
+        });
+    });
+
+    
+    function applyThemeToSelect2() {
+        const theme = document.documentElement.getAttribute('data-theme');
+        const isThemeDark = theme === 'dark';
+        
+        
+        $('.select2-dropdown').css({
+            'background-color': isThemeDark ? 'var(--select2-dropdown-bg)' : 'var(--select2-dropdown-bg)',
+            'border-color': isThemeDark ? 'var(--select2-selection-border)' : 'var(--select2-selection-border)'
+        });
+        
+        
+        $('.select2-selection').css({
+            'background-color': isThemeDark ? 'var(--select2-dropdown-bg)' : 'var(--select2-dropdown-bg)',
+            'border-color': isThemeDark ? 'var(--select2-selection-border)' : 'var(--select2-selection-border)'
+        });
+        
+        
+        $('.select2-results__option').css({
+            'color': isThemeDark ? 'var(--select2-dropdown-text)' : 'var(--select2-dropdown-text)'
+        });
+        
+        
+        $('.symptom-badge').css({
+            'background': isThemeDark ? 'var(--symptom-badge-bg)' : 'var(--symptom-badge-bg)',
+            'border-color': isThemeDark ? 'var(--symptom-badge-border)' : 'var(--symptom-badge-border)',
+            'color': isThemeDark ? 'var(--symptom-badge-text)' : 'var(--symptom-badge-text)'
+        });
+        
+        $('.symptom-badge i').css({
+            'color': isThemeDark ? 'var(--symptom-badge-icon)' : 'var(--symptom-badge-icon)'
+        });
+    }
+    
+    
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                applyThemeToSelect2();
+            }
+        });
+    });
+    
+    observer.observe(document.documentElement, { attributes: true });
+    
+    
+    $(document).on('select2:open', function() {
+        setTimeout(applyThemeToSelect2, 0);
+    });
+    
+    
+    $(document).ready(function() {
+        
+        $('#illness-select').select2({
+            placeholder: "Select an illness to learn more...",
+            allowClear: true,
+            templateResult: formatIllness,
+            templateSelection: formatIllnessSelection
+        });
+        
+        
+        setTimeout(applyThemeToSelect2, 0);
+        
+        
+        $('#theme-toggle').on('click', function() {
+            setTimeout(applyThemeToSelect2, 0);
+        });
+    });
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+

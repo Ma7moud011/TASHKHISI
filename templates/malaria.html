@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}Malaria Cell Detection{% endblock %}
+
+{% block style %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/disease-pages.css') }}">
+  <style>
+    .container {
+      display: flex;
+      width: 80%;
+      margin: 40px auto;
+    }
+    .left-panel {
+      flex: 1;
+      position: relative;
+    }
+    .right-panel {
+      flex: 1;
+      margin-left: 20px;
+      padding: 10px;
+      border-left: 2px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .image-container {
+      position: relative;
+      max-width: 100%;
+    }
+    .image-container img {
+      width: 100%;
+      display: block;
+      border-radius: 10px;
+      position: relative;
+      z-index: 0;
+    }
+    .bounding-box {
+      position: absolute;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+      z-index: 2001;
+    }
+    .bounding-box.highlight {
+      background-color: transparent;
+      border-color: yellow !important;
+      box-shadow: 0 0 15px 5px rgba(255, 255, 0, 0.8);
+    }
+    .dim-overlay {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.7);
+      pointer-events: none;
+      z-index: 2000;
+    }
+    .cell-info {
+      padding: 10px;
+      background: var(--card-bg);
+      border-radius: 5px;
+      font-size: 20px;
+      box-shadow: 0px 0px 5px var(--card-shadow);
+      color: var(--label-color);
+      transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .summary {
+      padding: 10px 10px;
+      background: var(--section-bg);
+      color: var(--subtitle-color);
+      border-radius: 5px;
+      white-space: pre-wrap;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: bold;
+      box-shadow: 0 1px 4px var(--card-shadow);
+      transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .summary h3 {
+      margin: -40px 0;
+      color: var(--heading-color);
+      transition: color 0.3s ease;
+    }
+    .upload-box {
+      margin: 20px auto; 
+      padding: 15px;
+      background: var(--button-bg);
+      color: var(--button-color);
+      text-align: center;
+      border-radius: 5px;
+      cursor: pointer;
+      position: relative;
+      width: 300px;
+      display: block;
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 2px 8px var(--button-shadow);
+    }
+    .upload-box:hover {
+      background: var(--button-hover-bg);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--button-shadow-hover);
+    }
+    .upload-box input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .label-text {
+      display: none;
+      position: absolute;
+      top: -25px;
+      left: 0;
+      font-size: 14px;
+      color: #fff;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+      z-index: 2002;
+      white-space: nowrap;
+    }
+    .bounding-box:hover .label-text {
+      display: block;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        width: 95%;
+      }
+      .right-panel {
+        margin-left: 0;
+        margin-top: 20px;
+        border-left: none;
+        border-top: 2px solid var(--card-border);
+        padding-top: 20px;
+      }
+    }
+    .upload-box.disabled {
+      background: var(--input-border);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      margin-top: 10px;
+    }
+    
+    .upload-box.disabled:hover {
+      background: var(--input-border);
+    }
+    
+    .processing-text {
+      color: var(--subtitle-color);
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h2>Malaria Cell Detection</h2>
+  
+  <div class="upload-box" id="upload-box">
+    <i class="fas fa-upload"></i> Upload Cell Image
+    <input type="file" id="file-input" accept="image/*">
+  </div>
+  
+  <div id="loader-container" style="display: none; text-align: center; margin-top: 20px;">
+    <div class="loader"></div>
+    <p class="processing-text">Analyzing image, please wait...</p>
+  </div>
+  
+  <div class="container" id="results-container" style="display: none;">
+    <div class="left-panel">
+      <div class="image-container" id="imgContainer">
+        <img id="result-image" src="static/uploads/sample.jpg" alt="Analysis Results">
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="cell-info" id="cell-info">
+        <h3>Cell Details</h3>
+        <p><strong>State:</strong> <span id="cell-label">Not Available</span></p>
+        <p><strong>Confidence:</strong> <span id="cell-confidence">Not Available</span></p>
+        <p><strong>Cell Type:</strong> <span id="cell-yolo-label">Not Available</span></p>
+      </div>
+      <div class="summary">
+        <h3>Results Summary</h3>
+        <p id="summary-text">No data available</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    const uploadBox = document.getElementById("upload-box");
+    const fileInput = document.getElementById("file-input");
+    const loaderContainer = document.getElementById("loader-container");
+    const resultsContainer = document.getElementById("results-container");
+
+    function showLoader() {
+      loaderContainer.style.display = "block";
+      resultsContainer.style.display = "none";
+      uploadBox.classList.add("disabled");
+      fileInput.disabled = true;
+    }
+
+    function hideLoader() {
+      loaderContainer.style.display = "none";
+      uploadBox.classList.remove("disabled");
+      fileInput.disabled = false;
+    }
+    
+    fileInput.addEventListener("change", function(event) {
+      let file = event.target.files[0];
+      if (!file) return;
+      
+      showLoader();
+      
+      let formData = new FormData();
+      formData.append("files", file);
+      
+      fetch("/malaria_upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          let filename = data.filenames[0];
+          fetchDetections(filename);
+        } else {
+          console.error("Failed to upload the image");
+          alert("Error: Image upload failed. Please try a different image.");
+          hideLoader();
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("An unexpected error occurred during upload. Please try again.");
+        hideLoader();
+      });
+    });
+    
+    function fetchDetections(filename) {
+      fetch("/malaria_process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filenames: [filename] })
+      })
+      .then(response => response.json())
+      .then(data => {
+        resultsContainer.style.display = 'flex';
+        loadDetections(data);
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while processing the image. Please try again.");
+        hideLoader();
+      });
+    }
+    
+    function loadDetections(data) {
+      hideLoader();
+      if (!data.processed_image) {
+        console.error("No processed image found");
+        return;
+      }
+      
+      
+      let fastaiSummaryStr = "Classification Count:\n\n";
+      for (const key in data.summary) {
+        fastaiSummaryStr += `${key}: ${data.summary[key]}\n`;
+      }
+      
+      let yoloSummaryStr = "Blood Cell Count:\n\n";
+      for (const key in data.yolo_summary) {
+        yoloSummaryStr += `${key}: ${data.yolo_summary[key]}\n`;
+      }
+      
+      document.getElementById("summary-text").innerText =
+        fastaiSummaryStr + "\n" + yoloSummaryStr;
+      
+      const imgContainer = document.getElementById("imgContainer");
+      const imgElement = document.getElementById("result-image");
+      imgElement.src = data.processed_image;
+      
+      document.querySelectorAll(".bounding-box").forEach(box => box.remove());
+      
+      imgElement.onload = function() {
+        const imgWidth = imgElement.naturalWidth;
+        const imgHeight = imgElement.naturalHeight;
+        
+        
+        data.detections.forEach(det => {
+          let box = document.createElement("div");
+          box.className = "bounding-box";
+          
+          box.style.left = (det.x1 / imgWidth * 100) + "%";
+          box.style.top = (det.y1 / imgHeight * 100) + "%";
+          box.style.width = ((det.x2 - det.x1) / imgWidth * 100) + "%";
+          box.style.height = ((det.y2 - det.y1) / imgHeight * 100) + "%";
+          
+          
+          let labelSpan = document.createElement("span");
+          labelSpan.className = "label-text";
+          labelSpan.innerText = `${det.label} ${(det.fastai_conf * 100).toFixed(2)}% | ${det.yolo_label}`;
+          box.appendChild(labelSpan);
+          
+          box.onmouseover = function() {
+            const containerRect = imgContainer.getBoundingClientRect();
+            const boxRect = box.getBoundingClientRect();
+            
+            const topOverlay = document.createElement("div");
+            topOverlay.className = "dim-overlay";
+            topOverlay.style.left = "0px";
+            topOverlay.style.top = "0px";
+            topOverlay.style.width = "100%";
+            topOverlay.style.height = (boxRect.top - containerRect.top) + "px";
+            
+            const bottomOverlay = document.createElement("div");
+            bottomOverlay.className = "dim-overlay";
+            bottomOverlay.style.left = "0px";
+            bottomOverlay.style.top = (boxRect.bottom - containerRect.top) + "px";
+            bottomOverlay.style.width = "100%";
+            bottomOverlay.style.height = (containerRect.bottom - boxRect.bottom) + "px";
+            
+            const leftOverlay = document.createElement("div");
+            leftOverlay.className = "dim-overlay";
+            leftOverlay.style.left = "0px";
+            leftOverlay.style.top = (boxRect.top - containerRect.top) + "px";
+            leftOverlay.style.width = (boxRect.left - containerRect.left) + "px";
+            leftOverlay.style.height = boxRect.height + "px";
+            
+            const rightOverlay = document.createElement("div");
+            rightOverlay.className = "dim-overlay";
+            rightOverlay.style.left = (boxRect.right - containerRect.left) + "px";
+            rightOverlay.style.top = (boxRect.top - containerRect.top) + "px";
+            rightOverlay.style.width = (containerRect.right - boxRect.right) + "px";
+            rightOverlay.style.height = boxRect.height + "px";
+            
+            [topOverlay, bottomOverlay, leftOverlay, rightOverlay].forEach(overlay => {
+              overlay.style.position = "absolute";
+              overlay.style.background = "rgba(0,0,0,0.7)";
+              overlay.style.pointerEvents = "none";
+              overlay.style.zIndex = "2000";
+            });
+            
+            imgContainer.appendChild(topOverlay);
+            imgContainer.appendChild(bottomOverlay);
+            imgContainer.appendChild(leftOverlay);
+            imgContainer.appendChild(rightOverlay);
+            
+            document.querySelectorAll(".bounding-box").forEach(b => {
+              if (b !== box) {
+                b.style.opacity = "0.2";
+              }
+            });
+            box.classList.add("highlight");
+            showDetails(det);
+          };
+          
+          box.onmouseout = function() {
+            document.querySelectorAll(".dim-overlay").forEach(el => el.remove());
+            document.querySelectorAll(".bounding-box").forEach(b => {
+              b.style.opacity = "1";
+            });
+            box.classList.remove("highlight");
+          };
+          
+          imgContainer.appendChild(box);
+        });
+      };
+    }
+    
+    function showDetails(det) {
+      document.getElementById("cell-label").innerText = det.label;
+      document.getElementById("cell-confidence").innerText = (det.fastai_conf * 100).toFixed(2) + "%";
+      document.getElementById("cell-yolo-label").innerText = det.yolo_label;
+      document.getElementById("cell-info").style.display = "block";
+    }
+  </script>
+{% endblock %}

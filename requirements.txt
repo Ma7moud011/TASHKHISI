@@ -1,0 +1,12 @@
+flask
+flask_sqlalchemy
+werkzeug
+requests
+numpy
+pandas
+joblib
+opencv-python
+ultralytics
+fastai
+Pillow
+sqlalchemy 

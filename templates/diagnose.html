@@ -1,0 +1,1494 @@
+{% extends 'base.html' %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/diagnose.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+{% endblock %}
+{% block title %}Medical Diagnosis{% endblock %}
+{% block content %}
+<div class="diagnosis-container">
+    
+    
+    <div class="diagnosis-body">
+        <div class="progress-tracker">
+            <div class="progress-line">
+                <div class="progress-line-fill" id="progressLine"></div>
+            </div>
+            
+            <div class="progress-step active" id="step1">
+                <div class="step-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="step-label">Personal Information</div>
+            </div>
+
+            <div class="progress-step" id="step2">
+                <div class="step-icon">
+                    <i class="fas fa-notes-medical"></i>
+                </div>
+                <div class="step-label">Select Symptoms</div>
+            </div>
+
+            <div class="progress-step" id="step3">
+                <div class="step-icon">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="step-label">Diagnosis Results</div>
+            </div>
+        </div>
+        
+        <form id="diagnosisForm" class="diagnosis-form">
+            
+            <div id="step1-content" class="step-content">
+                <div class="form-section" style="margin-top: 30px;">
+                    <h3><i class="fas fa-info-circle"></i> Personal Information</h3>
+                    
+                    <div class="input-group">
+                        <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                        <select id="gender" name="gender" class="input-field" required>
+                <option value="" disabled selected hidden>Select your gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+        </div>
+
+                    <div class="input-group">
+                        <label for="birthYear"><i class="fas fa-calendar-alt"></i> Birth Year</label>
+                        <input type="number" id="birthYear" name="birth_year" class="input-field" required min="1900" max="2024" placeholder="Enter your birth year">
+            <div class="help-text">Year must be between 1900 and 2024</div>
+        </div>
+
+                    <div class="step-navigation" style="margin-top: 20px; text-align: right;">
+                        <button type="button" id="next-to-step2" class="action-button">
+                            <i class="fas fa-arrow-right"></i>
+                            Next: Select Symptoms
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div id="step2-content" class="step-content" style="display: none;">
+                <div class="symptoms-selection-container">
+                    
+                    <div class="body-diagram-container">
+                            <h4 style="margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; text-align: center; color: var(--text-color);"><i class="fas fa-child"></i> Select a body area</h4>
+                        
+                        
+                        <div class="body-map-container" style="position: relative; display: block; text-align: center; height: 560px;">
+                            <img id="bodyImage" src="{{ url_for('static', filename='images/body/pngwing.com.png') }}" alt="Human Body" style="height: 100%; max-width: 100%; object-fit: contain;">
+                            
+                            
+                            <div id="bodyPartLabel" style="position: absolute; bottom: -30px; left: 0; right: 0; text-align: center; font-weight: bold; color: var(--button-bg); height: 25px; font-size: 1rem;">
+                                Click on a body area
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="symptoms-right-container symptoms-right-order">
+                        
+                        <div class="filter-group-row order-1" style="margin-bottom: 20px;">
+                            <h4 style="margin-bottom: 12px; font-size: 1.1rem; color: var(--text-color);">
+                                <i class="fas fa-filter"></i> Filter Symptoms by Location
+                            </h4>
+                            <div style="display: flex; gap: 15px;">
+                                
+                                <div class="filter-group" style="flex: 1;">
+                                    <label for="bodyAreaFilter" style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-color);">
+                                        <i class="fas fa-body"></i> Body Area
+                                    </label>
+                                    <select id="bodyAreaFilter" class="input-field" style="width: 100%; padding: 10px; font-size: 1rem;">
+                                        <option value="">All Body Areas</option>
+                                        
+                                    </select>
+                                </div>
+
+                                
+                                <div class="filter-group" style="flex: 1;">
+                                    <label for="sublocationFilter" style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-color);">
+                                        <i class="fas fa-map-marker-alt"></i> Specific Area
+                                    </label>
+                                    <select id="sublocationFilter" class="input-field" style="width: 100%; padding: 10px; font-size: 1rem;" disabled>
+                                        <option value="">Select Body Area First</option>
+                                        
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="selected-symptoms-container order-2" style="display: none;">
+                                                            <h4 style="margin-top: 0; margin-bottom: 15px; font-size: 1.3rem; color: var(--button-bg); display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-clipboard-check" style="font-size: 1.4rem;"></i> Selected Symptoms
+                                <span id="selectedSymptomCount" style="margin-left: auto; font-size: 1rem; color: var(--text-color); font-weight: 500; background: var(--specialization-bg); padding: 3px 10px; border-radius: 20px;"></span>
+                            </h4>
+                            
+                            <div id="selectedSymptomsList" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 5px;">
+                                
+                            </div>
+                        </div>
+                        
+                        
+                        <div id="redFlagWarningsContainer" class="order-3" style="display: none;">
+                                                            <h4 style="margin-top: 0; margin-bottom: 15px; font-size: 1.3rem; color: var(--redflag-color); display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 1.4rem;"></i> Important Health Warnings
+                            </h4>
+                            
+                            <div id="redFlagWarningsList" style="padding: 5px;">
+                                
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="symptoms-grid order-4">
+                            
+                            <div class="available-symptoms-container grid-item">
+                                <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 1.2rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-list"></i> <span id="availableSymptomsTitle">Available Symptoms</span>
+                                    <span id="symptomCount" style="margin-left: auto; font-size: 0.9rem; color: var(--detail-label-color); font-weight: normal;"></span>
+                                </h4>
+                                
+                                
+                                <div class="search-box" style="margin-bottom: 0;">
+                                    <div style="position: relative;">
+                                        <input type="text" id="symptomSearchInput" class="input-field" placeholder="Search symptoms..." style="width: 100%; padding: 10px 10px 10px 40px; font-size: 1rem;">
+                                        <i class="fas fa-search" style="position: absolute; left: 14px; top: 14px; color: var(--detail-label-color);"></i>
+                                    </div>
+                                </div>
+                                
+                                <div id="availableSymptomsList">
+                                    <div class="loading" style="text-align: center; padding: 20px;">
+                                        <div class="loader" style="margin: 0 auto 10px;"></div>
+                                        <p>Loading symptoms...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="suggested-symptoms-container grid-item">
+                                <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 1.2rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-lightbulb"></i> Suggested Symptoms
+                                </h4>
+                                
+                                <div id="suggestedSymptoms">
+                                    <div class="no-results">
+                                        <i class="fas fa-info-circle" style="color: var(--no-results-color);"></i>
+                                        <h3 style="font-size: 1.1rem; margin: 10px 0; color: var(--text-color);">Add some symptoms first</h3>
+                                        <p style="font-size: 1rem; color: var(--text-color);">Select some initial symptoms to get suggestions for related symptoms.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="step-navigation" style="margin-top: 20px; display: flex; justify-content: space-between; position: sticky; bottom: 0; background: var(--container-bg); padding: 15px; margin-left: -15px; margin-right: -15px; width: calc(100% + 30px); border-top: 1px solid var(--progress-border);">
+                            <button type="button" id="back-to-step1" class="secondary-button">
+                                <i class="fas fa-arrow-left"></i>
+                                Back
+                            </button>
+                            
+                            <button type="submit" class="action-button">
+                                <i class="fas fa-stethoscope"></i>
+                                Start Diagnosis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </form>
+
+        <div class="loader-container" id="loading">
+                <div class="loader"></div>
+            <div class="loader-text">Analyzing symptoms, please wait...</div>
+            </div>
+        
+        <div class="results-container" id="result"></div>
+
+                    <div id="conditionInfoModal" class="modal" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto; color: var(--text-color);">
+            <div class="modal-content" style="background-color: var(--container-bg); margin: 5% auto; padding: 20px; width: 90%; max-width: 800px; border-radius: 12px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                <span class="close-modal" style="position: absolute; right: 20px; top: 20px; font-size: 28px; font-weight: bold; cursor: pointer; color: var(--text-color);">&times;</span>
+                <div id="conditionInfoContent" style="margin-top: 20px;">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    {% endblock %}
+    {% block script %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{{ url_for('static', filename='js/body-map.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+        
+        let selectedBodyLocation = null;
+        let selectedBodySublocation = null;
+        let selectedSymptoms = [];
+        let allSymptoms = [];
+        let redFlagSymptoms = {};
+        let allBodyLocations = [];
+        let allSublocations = {};
+        let allLocationSymptoms = {};
+        let filteredSymptomsList = [];
+        let symptomSearchTimeout;
+        let currentStep = 1;
+        
+        
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'data-theme') {
+                    
+                    if (selectedSymptoms.length > 0) {
+                        updateSelectedSymptomsDisplay();
+                        updateRedFlagWarnings();
+                    }
+                    
+                    
+                    if (filteredSymptomsList.length > 0) {
+                        displayAvailableSymptoms(filteredSymptomsList);
+                    }
+                    
+                    
+                    if (selectedSymptoms.length > 0) {
+                        fetchSuggestedSymptoms();
+                    }
+                }
+            });
+        });
+        
+        
+        observer.observe(document.body, { attributes: true });
+        
+        
+        $(document).on('bodyPartSelected', function(event) {
+            const locationId = event.detail.locationId;
+            const locationName = event.detail.locationName;
+            
+            
+            $('#bodyAreaFilter').val(locationId).trigger('change');
+        });
+        
+        
+        $('#next-to-step2').on('click', function() {
+            
+            if (!$('#gender').val()) {
+                alert('Please select your gender.');
+                $('#gender').focus();
+                return;
+            }
+            
+            if (!$('#birthYear').val() || $('#birthYear').val() < 1900 || $('#birthYear').val() > new Date().getFullYear()) {
+                alert('Please enter a valid birth year between 1900 and ' + new Date().getFullYear() + '.');
+                $('#birthYear').focus();
+                return;
+            }
+            
+            
+            $('#step1-content').hide();
+            $('#step2-content').show();
+            currentStep = 2;
+            updateProgress(currentStep);
+            
+            
+            if (allSymptoms.length === 0) {
+                
+                fetch('/api/symptoms')
+                    .then(response => response.json())
+                    .then(data => {
+                        allSymptoms = data;
+                        
+                        initializeUnifiedView();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching symptoms:', error);
+                        $('#availableSymptomsList').html(`
+                            <div class="no-results">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error loading symptoms. Please try again later.</p>
+                            </div>
+                        `);
+                    });
+            }
+        });
+        
+        $('#back-to-step1').on('click', function() {
+            
+            $('#step2-content').hide();
+            $('#step1-content').show();
+            currentStep = 1;
+            updateProgress(currentStep);
+        });
+        
+        
+        function updateProgress(step) {
+            
+            $('.progress-step').removeClass('active completed');
+            
+            
+            for (let i = 1; i < step; i++) {
+                $(`#step${i}`).addClass('completed');
+            }
+            
+            
+            $(`#step${step}`).addClass('active');
+            
+            
+            const progress = ((step - 1) / 2) * 100;
+            $('#progressLine').css('width', `${progress}%`);
+        }
+        
+        
+        updateProgress(1);
+        
+        
+                fetch('/api/symptoms')
+                    .then(response => response.json())
+                    .then(data => {
+                allSymptoms = data;
+                
+                initializeUnifiedView();
+            })
+            .catch(error => {
+                console.error('Error fetching symptoms:', error);
+                $('#availableSymptomsList').html(`
+                    <div class="no-results">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading symptoms. Please try again later.</p>
+                    </div>
+                `);
+            });
+            
+        
+        function initializeUnifiedView() {
+            
+            fetch('/api/body-locations')
+                .then(response => response.json())
+                .then(data => {
+                    allBodyLocations = data;
+                    
+                    
+                    const bodyAreaFilter = $('#bodyAreaFilter');
+                    bodyAreaFilter.find('option:not(:first)').remove();
+                    
+                    data.forEach(location => {
+                        bodyAreaFilter.append(`<option value="${location.ID}">${location.Name}</option>`);
+                    });
+                    
+                    
+                    setupSymptomFilters();
+                    
+                    
+                    setupSymptomSearch();
+                    
+                    
+                    loadAllSymptomsByLocation();
+                })
+                .catch(error => {
+                    console.error('Error fetching body locations:', error);
+                    $('#availableSymptomsList').html(`
+                        <div class="no-results">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Error loading body locations. Please try again later.</p>
+                        </div>
+                    `);
+                });
+        }
+        
+        
+        function setupSymptomFilters() {
+            
+            $('#bodyAreaFilter').on('change', function() {
+                const locationId = $(this).val();
+                const sublocationFilter = $('#sublocationFilter');
+                
+                
+                if (locationId) {
+                    sublocationFilter.empty().append('<option value="">All Specific Areas</option>');
+                    
+                    
+                    if (!allSublocations[locationId]) {
+                        const gender = $('#gender').val() || 'male';
+                        
+                        
+                        sublocationFilter.html('<option value="">Loading...</option>');
+                        sublocationFilter.prop('disabled', true);
+                        
+                        fetch(`/api/body/locations/${locationId}/sublocations?gender=${gender}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                allSublocations[locationId] = data;
+                                
+                                
+                                updateSublocationDropdown(locationId);
+                            })
+                            .catch(error => {
+                                console.error(`Error fetching sublocations for ${locationId}:`, error);
+                                sublocationFilter.html('<option value="">Error loading areas</option>');
+                                sublocationFilter.prop('disabled', true);
+                            });
+                    } else {
+                        
+                        updateSublocationDropdown(locationId);
+                    }
+                    
+                    selectedBodyLocation = locationId;
+                } else {
+                    
+                    sublocationFilter.empty().append('<option value="">Select Body Area First</option>');
+                    sublocationFilter.prop('disabled', true);
+                    
+                    selectedBodyLocation = null;
+                }
+                
+                
+                filterAndDisplaySymptoms();
+            });
+            
+            
+            $('#sublocationFilter').on('change', function() {
+                selectedBodySublocation = $(this).val();
+                
+                
+                filterAndDisplaySymptoms();
+            });
+        }
+        
+        
+        function updateSublocationDropdown(locationId) {
+            const sublocationFilter = $('#sublocationFilter');
+            sublocationFilter.empty().append('<option value="">All Specific Areas</option>');
+            
+            if (allSublocations[locationId] && allSublocations[locationId].length > 0) {
+                allSublocations[locationId].forEach(sublocation => {
+                    sublocationFilter.append(`<option value="${sublocation.ID}">${sublocation.Name}</option>`);
+                });
+                
+                sublocationFilter.prop('disabled', false);
+            } else {
+                sublocationFilter.append('<option value="" disabled>No specific areas available</option>');
+                sublocationFilter.prop('disabled', true);
+            }
+        }
+
+        
+        function setupSymptomSearch() {
+            $('#symptomSearchInput').on('input', function() {
+                const searchTerm = $(this).val().toLowerCase().trim();
+                
+                
+                if (symptomSearchTimeout) {
+                    clearTimeout(symptomSearchTimeout);
+                }
+                
+                
+                symptomSearchTimeout = setTimeout(() => {
+                    filterAndDisplaySymptoms(searchTerm);
+                }, 300);
+            });
+        }
+        
+        
+        function loadAllSymptomsByLocation() {
+            
+            $('#availableSymptomsList').html(`
+                <div class="loading" style="text-align: center; padding: 20px;">
+                    <div class="loader" style="margin: 0 auto 10px;"></div>
+                    <p>Loading all body areas and symptoms...</p>
+                </div>
+            `);
+            
+            
+            if (allBodyLocations.length > 0) {
+                fetchAllSublocations();
+            } else {
+                
+                fetch('/api/body-locations')
+                    .then(response => response.json())
+                    .then(data => {
+                        allBodyLocations = data;
+                        fetchAllSublocations();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching body locations:', error);
+                        $('#availableSymptomsList').html(`
+                            <div class="no-results">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error loading body locations. Please try again later.</p>
+                            </div>
+                        `);
+                    });
+            }
+        }
+        
+        
+        function fetchAllSublocations() {
+            
+            const totalRequests = allBodyLocations.length;
+            let completedRequests = 0;
+            
+            
+            allBodyLocations.forEach(location => {
+                if (!allSublocations[location.ID]) {
+                    const gender = $('#gender').val() || 'male';
+                    
+                    fetch(`/api/body/locations/${location.ID}/sublocations?gender=${gender}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            allSublocations[location.ID] = data;
+                            completedRequests++;
+                            
+                            
+                            if (completedRequests === totalRequests) {
+                                fetchAllSymptomsForSublocations();
+                            }
+                        })
+                        .catch(error => {
+                            console.error(`Error fetching sublocations for ${location.Name}:`, error);
+                            completedRequests++;
+                            
+                            
+                            if (completedRequests === totalRequests) {
+                                fetchAllSymptomsForSublocations();
+                            }
+                        });
+                } else {
+                    completedRequests++;
+                    
+                    
+                    if (completedRequests === totalRequests) {
+                        fetchAllSymptomsForSublocations();
+                    }
+                }
+            });
+        }
+        
+        
+        function fetchAllSymptomsForSublocations() {
+            
+            let totalSublocations = 0;
+            let completedRequests = 0;
+            
+            
+            Object.values(allSublocations).forEach(sublocationsArray => {
+                totalSublocations += sublocationsArray.length;
+            });
+            
+            
+            if (totalSublocations === 0) {
+                compileAndDisplayAllSymptoms();
+                return;
+            }
+            
+            
+            Object.entries(allSublocations).forEach(([locationId, sublocationsArray]) => {
+                sublocationsArray.forEach(sublocation => {
+                    if (!allLocationSymptoms[sublocation.ID]) {
+                        const gender = $('#gender').val() || 'male';
+                        
+                        fetch('/api/body-sublocation-symptoms', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                sublocation_id: parseInt(sublocation.ID),
+                                gender: gender
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                allLocationSymptoms[sublocation.ID] = {
+                                    locationId: locationId,
+                                    sublocationName: sublocation.Name,
+                                    symptoms: data
+                                };
+                                
+                                completedRequests++;
+                                
+                                if (completedRequests === totalSublocations) {
+                                    
+                                    compileAndDisplayAllSymptoms();
+                                }
+                            })
+                            .catch(error => {
+                                console.error(`Error fetching symptoms for ${sublocation.Name}:`, error);
+                                completedRequests++;
+                                
+                                if (completedRequests === totalSublocations) {
+                                    
+                                    compileAndDisplayAllSymptoms();
+                                }
+                            });
+                    } else {
+                        completedRequests++;
+                        
+                        if (completedRequests === totalSublocations) {
+                            
+                            compileAndDisplayAllSymptoms();
+                        }
+                    }
+                });
+            });
+        }
+        
+        
+        function compileAndDisplayAllSymptoms() {
+            
+            let allSymptomsWithLocations = [];
+            
+            Object.entries(allLocationSymptoms).forEach(([sublocationId, data]) => {
+                const locationId = data.locationId;
+                const sublocationName = data.sublocationName;
+                const locationName = allBodyLocations.find(loc => loc.ID == locationId)?.Name || 'Unknown';
+                
+                data.symptoms.forEach(symptom => {
+                    
+                    const existingIndex = allSymptomsWithLocations.findIndex(s => s.symptomId === symptom.ID);
+                    
+                    if (existingIndex === -1) {
+                        
+                        allSymptomsWithLocations.push({
+                            symptomId: symptom.ID,
+                            symptomName: symptom.Name,
+                            locations: [{
+                                locationId: locationId,
+                                locationName: locationName,
+                                sublocationId: sublocationId,
+                                sublocationName: sublocationName
+                            }]
+                        });
+                    } else {
+                        
+                        allSymptomsWithLocations[existingIndex].locations.push({
+                            locationId: locationId,
+                            locationName: locationName,
+                            sublocationId: sublocationId,
+                            sublocationName: sublocationName
+                        });
+                    }
+                });
+            });
+            
+            
+            allSymptomsWithLocations.sort((a, b) => a.symptomName.localeCompare(b.symptomName));
+            
+            
+            filteredSymptomsList = allSymptomsWithLocations;
+            
+            
+            filterAndDisplaySymptoms();
+        }
+        
+        
+        function filterAndDisplaySymptoms(searchTerm = '') {
+            const locationId = $('#bodyAreaFilter').val();
+            const sublocationId = $('#sublocationFilter').val();
+            
+            let filtered = [...filteredSymptomsList];
+            let title = 'All Symptoms';
+            
+            
+            filteredSymptomsList = filtered;
+            
+            
+            if (locationId) {
+                filtered = filtered.filter(symptom => 
+                    symptom.locations.some(loc => loc.locationId == locationId)
+                );
+                
+                const locationName = allBodyLocations.find(loc => loc.ID == locationId)?.Name || 'Unknown';
+                title = `Symptoms in ${locationName}`;
+                
+                
+                if (sublocationId) {
+                    filtered = filtered.filter(symptom => 
+                        symptom.locations.some(loc => loc.sublocationId == sublocationId)
+                    );
+                    
+                    const sublocationName = allSublocations[locationId]?.find(loc => loc.ID == sublocationId)?.Name || 'Unknown';
+                    title = `Symptoms in ${sublocationName}`;
+                }
+            }
+            
+            
+            if (searchTerm && searchTerm.length > 0) {
+                filtered = filtered.filter(symptom => 
+                    symptom.symptomName.toLowerCase().includes(searchTerm)
+                );
+                title = `Search results for "${searchTerm}"`;
+                
+                
+                if (locationId) {
+                    const locationName = allBodyLocations.find(loc => loc.ID == locationId)?.Name || 'Unknown';
+                    if (sublocationId) {
+                        const sublocationName = allSublocations[locationId]?.find(loc => loc.ID == sublocationId)?.Name || 'Unknown';
+                        title = `Search results in ${sublocationName}`;
+                    } else {
+                        title = `Search results in ${locationName}`;
+                    }
+                }
+            }
+            
+            
+            $('#availableSymptomsTitle').text(title);
+            
+            
+            displayAvailableSymptoms(filtered);
+        }
+
+        
+        function displayAvailableSymptoms(symptoms) {
+            const container = $('#availableSymptomsList');
+            container.empty();
+            
+            
+            $('#symptomCount').text(`${symptoms.length} symptoms`);
+            
+            if (symptoms.length === 0) {
+                container.html(`
+                    <div class="no-results" style="text-align: center; padding: 20px;">
+                        <i class="fas fa-info-circle" style="font-size: 2rem; color: var(--no-results-color); margin-bottom: 10px;"></i>
+                        <p>No symptoms found for the selected filters.</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            
+            let currentLetter = '';
+            let symptomsHtml = '';
+            
+            symptoms.forEach(symptom => {
+                const firstLetter = symptom.symptomName.charAt(0).toUpperCase();
+                
+                
+                if (firstLetter !== currentLetter) {
+                    currentLetter = firstLetter;
+                    symptomsHtml += `
+                        <div class="letter-divider" style="font-weight: bold; margin: 10px 0 5px; padding-bottom: 3px; border-bottom: 1px solid var(--progress-border);">
+                            ${currentLetter}
+                        </div>
+                    `;
+                }
+                
+                
+                const locationsStr = symptom.locations.map(loc => 
+                    `<span class="location-tag" style="background: var(--body-location-bg); font-size: 0.75rem; padding: 2px 6px; border-radius: 12px; white-space: nowrap;">${loc.sublocationName}</span>`
+                ).join(' ');
+                
+                
+                const isSelected = selectedSymptoms.some(s => parseInt(s.id) === parseInt(symptom.symptomId));
+                
+                
+                const hasRedFlag = redFlagSymptoms[symptom.symptomId] ? true : false;
+                
+                symptomsHtml += `
+                    <div class="available-symptom-item${isSelected ? ' selected' : ''}${hasRedFlag ? ' has-redflag' : ''}" 
+                         data-id="${symptom.symptomId}" 
+                         data-name="${symptom.symptomName}"
+                         style="padding: 8px; border-radius: 6px; margin-bottom: 5px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; background: ${isSelected ? 'var(--specialization-bg)' : 'var(--container-bg)'}; border: 1px solid ${isSelected ? 'var(--button-bg)' : 'var(--progress-border)'};">
+                        <div style="flex: 1; min-width: 200px;">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <i class="fas ${isSelected ? 'fa-check-circle' : 'fa-plus-circle'}" style="color: ${isSelected ? 'var(--step-icon-completed-bg)' : 'var(--button-bg)'}; font-size: 1rem;"></i>
+                                <span style="font-weight: 500; color: var(--text-color);">${symptom.symptomName}</span>
+                                ${hasRedFlag ? `
+                                    <span class="redflag-tooltip" style="margin-left: 5px;">
+                                        <span class="redflag-indicator" style="background: var(--redflag-tooltip-bg); color: var(--redflag-color); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </span>
+                                        <span class="tooltip-text">${redFlagSymptoms[symptom.symptomId]}</span>
+                                    </span>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="locations-container" style="display: flex; flex-wrap: wrap; gap: 5px; font-size: 0.8rem; color: var(--detail-label-color);">
+                            ${locationsStr}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.html(symptomsHtml);
+            
+            
+            $('.available-symptom-item').on('click', function() {
+                const symptomId = $(this).data('id');
+                const symptomName = $(this).data('name');
+                const isSelected = $(this).hasClass('selected');
+                
+                if (isSelected) {
+                    
+                    removeSymptomFromSelection(symptomId);
+                    
+                    
+                    const $this = $(this);
+                    $this.removeClass('selected');
+                    $this.css('background', 'var(--container-bg)');
+                    $this.css('border-color', 'var(--progress-border)');
+                    $this.find('.fas').removeClass('fa-check-circle').addClass('fa-plus-circle').css('color', 'var(--button-bg)');
+                } else {
+                    
+                    addSymptomToSelection(symptomId, symptomName);
+                    
+                    
+                    const $this = $(this);
+                    $this.addClass('selected');
+                    $this.css('background', 'var(--specialization-bg)');
+                    $this.css('border-color', 'var(--button-bg)');
+                    $this.find('.fas').removeClass('fa-plus-circle').addClass('fa-check-circle').css('color', 'var(--step-icon-completed-bg)');
+                }
+            });
+            
+            
+            initializeTooltips();
+        }
+        
+        
+        function addSymptomToSelection(symptomId, symptomName) {
+            
+            if (selectedSymptoms.some(s => parseInt(s.id) === parseInt(symptomId))) {
+                return;
+            }
+            
+            
+            selectedSymptoms.push({
+                id: symptomId,
+                text: symptomName
+            });
+            
+            
+            checkForRedFlag(symptomId);
+            
+            
+            updateSelectedSymptomsDisplay();
+            
+            
+            fetchSuggestedSymptoms();
+        }
+        
+        
+        function removeSymptomFromSelection(symptomId) {
+            
+            selectedSymptoms = selectedSymptoms.filter(s => parseInt(s.id) !== parseInt(symptomId));
+            
+            
+            updateSelectedSymptomsDisplay();
+            
+            
+            fetchSuggestedSymptoms();
+            
+            
+            updateRedFlagWarnings();
+        }
+        
+        
+        function updateSelectedSymptomsDisplay() {
+            const container = $('#selectedSymptomsList');
+            container.empty();
+            
+            if (selectedSymptoms.length > 0) {
+                
+                $('.selected-symptoms-container').show();
+                
+                
+                $('#selectedSymptomCount').text(`${selectedSymptoms.length} symptoms`);
+                
+                
+                selectedSymptoms.forEach(symptom => {
+                    const hasRedFlag = redFlagSymptoms[symptom.id] ? true : false;
+                    
+                    const pill = $(
+                        `<div class="selected-symptom-pill" data-id="${symptom.id}" style="background: ${hasRedFlag ? 'var(--redflag-tooltip-bg)' : 'var(--specialization-bg)'}; color: ${hasRedFlag ? 'var(--redflag-tooltip-text)' : 'var(--button-bg)'}; border-radius: 20px; padding: 8px 15px; font-size: 1rem; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <span>${symptom.text}</span>
+                            ${hasRedFlag ? `
+                                <span class="redflag-tooltip">
+                                    <span class="redflag-dot" style="color: var(--redflag-tooltip-text); font-size: 1.2rem;">⚠️</span>
+                                    <span class="tooltip-text">${redFlagSymptoms[symptom.id]}</span>
+                                </span>
+                            ` : ''}
+                            <button class="remove-symptom" style="border: none; background: none; font-size: 1.3rem; cursor: pointer; margin-left: 5px; padding: 0 5px; color: var(--redflag-tooltip-text);">×</button>
+                        </div>`
+                    );
+                    
+                    container.append(pill);
+                });
+                
+                
+                updateRedFlagWarnings();
+                
+                
+                $('.remove-symptom').on('click', function(e) {
+                    e.stopPropagation();
+                    const symptomId = $(this).parent().data('id');
+                    
+                    
+                    removeSymptomFromSelection(symptomId);
+                    
+                    
+                    const $item = $('.available-symptom-item[data-id="' + symptomId + '"]');
+                    $item.removeClass('selected');
+                    $item.css('background', 'var(--container-bg)');
+                    $item.css('border-color', 'var(--progress-border)');
+                    $item.find('.fas').removeClass('fa-check-circle').addClass('fa-plus-circle').css('color', 'var(--button-bg)');
+                });
+                
+                
+                initializeTooltips();
+            } else {
+                
+                $('.selected-symptoms-container').hide();
+                
+                
+                $('#redFlagWarningsContainer').hide();
+            }
+        }
+        
+        
+        function updateRedFlagWarnings() {
+            
+            const redFlagWarnings = selectedSymptoms
+                .filter(symptom => redFlagSymptoms[symptom.id])
+                .map(symptom => ({
+                    id: symptom.id,
+                    name: symptom.text,
+                    warning: redFlagSymptoms[symptom.id]
+                }));
+            
+            if (redFlagWarnings.length > 0) {
+                
+                $('#redFlagWarningsContainer').show();
+                
+                
+                let warningsHtml = '';
+                
+                redFlagWarnings.forEach(warning => {
+                    warningsHtml += `
+                        <div class="red-flag-warning" style="background: var(--container-bg); padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--redflag-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <div style="font-weight: 600; color: var(--redflag-color); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; font-size: 1.05rem;">
+                                <i class="fas fa-exclamation-circle"></i> ${warning.name}
+                            </div>
+                            <div style="color: var(--text-color); font-size: 0.95rem; line-height: 1.5;">
+                                ${warning.warning}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                $('#redFlagWarningsList').html(warningsHtml);
+            } else {
+                
+                $('#redFlagWarningsContainer').hide();
+            }
+        }
+        
+        
+        function checkForRedFlag(symptomId) {
+            
+            if (redFlagSymptoms[symptomId] !== undefined) {
+                
+                updateSelectedSymptomsDisplay();
+                return;
+            }
+            
+            console.log('Checking red flag for symptom ID:', symptomId);
+            fetch(`/api/symptom-redflag/${symptomId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Red flag data:', data);
+                    
+                    
+                    if (data.redflag && data.redflag.trim() !== '') {
+                        redFlagSymptoms[symptomId] = data.redflag;
+                    } else {
+                        
+                        redFlagSymptoms[symptomId] = null;
+                    }
+                    
+                    
+                    updateSelectedSymptomsDisplay();
+                    filterAndDisplaySymptoms($('#symptomSearchInput').val().toLowerCase().trim());
+                })
+                .catch(error => {
+                    console.error('Error fetching red flag:', error);
+                    redFlagSymptoms[symptomId] = null;
+                });
+        }
+        
+        
+        function initializeTooltips() {
+            
+            $('.redflag-tooltip').css('z-index', '1000');
+            $('.redflag-tooltip .tooltip-text').css('z-index', '1001');
+            
+            
+            $('.redflag-indicator, .redflag-dot').off('mouseenter mouseleave').hover(
+                function() {
+                    $(this).siblings('.tooltip-text').css({
+                        'visibility': 'visible',
+                        'opacity': '1'
+                    });
+                },
+                function() {
+                    $(this).siblings('.tooltip-text').css({
+                        'visibility': 'hidden',
+                        'opacity': '0'
+                    });
+                }
+            );
+        }
+
+        
+        function fetchSuggestedSymptoms() {
+            if (selectedSymptoms.length === 0) {
+                $('#suggestedSymptoms').html(`
+                    <div class="no-results">
+                            <i class="fas fa-info-circle" style="color: var(--no-results-color);"></i>
+                            <h3 style="color: var(--text-color);">Add some symptoms first</h3>
+                            <p style="color: var(--text-color);">Select some initial symptoms to get suggestions for related symptoms.</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            
+            const symptomIds = selectedSymptoms.map(s => s.id);
+            
+            
+            $('#suggestedSymptoms').html(`
+                <div class="loading" style="text-align: center; padding: 20px; color: var(--text-color);">
+                    <div class="loader" style="margin: 0 auto 10px;"></div>
+                    <p>Finding related symptoms...</p>
+                </div>
+            `);
+            
+            
+            fetch('/api/proposed-symptoms', {
+                        method: 'POST',
+                        headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    gender: $('#gender').val() || 'male',
+                    birth_year: parseInt($('#birthYear').val()) || new Date().getFullYear() - 30,
+                    symptom_ids: symptomIds
+                })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                    if (data && data.length > 0) {
+                        let suggestionsHtml = '';
+                        
+                        data.forEach(suggestion => {
+                            
+                            if (selectedSymptoms.some(s => parseInt(s.id) === parseInt(suggestion.ID))) {
+                                return;
+                            }
+                            
+                            
+                            const hasRedFlag = redFlagSymptoms[suggestion.ID] ? true : false;
+                            
+                            suggestionsHtml += `
+                                <div class="suggested-symptom${hasRedFlag ? ' has-redflag' : ''}" 
+                                     data-id="${suggestion.ID}" 
+                                     data-name="${suggestion.Name}"
+                                     style="background: ${hasRedFlag ? 'var(--redflag-tooltip-bg)' : 'var(--body-location-bg)'}; border: 1px solid ${hasRedFlag ? 'var(--redflag-color)' : 'var(--progress-border)'}; border-radius: 6px; padding: 8px 12px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <i class="fas fa-plus-circle" style="color: ${hasRedFlag ? 'var(--redflag-color)' : 'var(--button-bg)'};"></i>
+                                    <span>${suggestion.Name}</span>
+                                    ${hasRedFlag ? `
+                                        <span class="redflag-tooltip" style="margin-left: auto;">
+                                            <span class="redflag-indicator" style="background: var(--redflag-tooltip-bg); color: var(--redflag-color); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            </span>
+                                            <span class="tooltip-text">${redFlagSymptoms[suggestion.ID]}</span>
+                                        </span>
+                                    ` : ''}
+                                    </div>
+                                `;
+                            
+                            
+                            if (!redFlagSymptoms[suggestion.ID]) {
+                                checkForRedFlag(suggestion.ID);
+                            }
+                        });
+                        
+                        if (suggestionsHtml) {
+                            $('#suggestedSymptoms').html(suggestionsHtml);
+                        } else {
+                            $('#suggestedSymptoms').html(`
+                                <div class="no-results">
+                                    <i class="fas fa-info-circle"></i>
+                                    <h3>No additional suggestions</h3>
+                                    <p>No additional symptoms suggested based on your current selection.</p>
+                                </div>
+                            `);
+                        }
+                        
+                        
+                        $('.suggested-symptom').on('click', function() {
+                            const symptomId = $(this).data('id');
+                            const symptomName = $(this).data('name');
+                            
+                            
+                            addSymptomToSelection(symptomId, symptomName);
+                            
+                            
+                            $(this).fadeOut(300, function() {
+                                $(this).remove();
+                                
+                                
+                                if ($('.suggested-symptom:visible').length === 0) {
+                                    $('#suggestedSymptoms').html(`
+                                        <div class="no-results">
+                                            <i class="fas fa-check-circle"></i>
+                                            <h3>All suggestions added</h3>
+                                            <p>You've added all the suggested symptoms.</p>
+                                        </div>
+                                    `);
+                                }
+                            });
+                        });
+                        
+                        
+                        initializeTooltips();
+                    } else {
+                        $('#suggestedSymptoms').html(`
+                            <div class="no-results">
+                                <i class="fas fa-info-circle"></i>
+                                <h3>No suggestions available</h3>
+                                <p>No additional symptoms suggested based on your current selection.</p>
+                            </div>
+                        `);
+                        }
+                    })
+                    .catch(error => {
+                    console.error('Error fetching suggested symptoms:', error);
+                    $('#suggestedSymptoms').html(`
+                        <div class="no-results">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Error loading suggested symptoms. Please try again later.</p>
+                        </div>
+                    `);
+                });
+        }
+        
+        
+        $('.tab-button').on('click', function() {
+            const tabId = $(this).data('tab');
+            
+            
+            if (!$(this).prop('disabled')) {
+                $('.tab-button').removeClass('active');
+                $('.tab-content').removeClass('active');
+                
+                $(this).addClass('active');
+                $(`#${tabId}`).addClass('active');
+                
+                
+                if (tabId === 'suggested' && selectedSymptoms.length > 0) {
+                    fetchSuggestedSymptoms();
+                }
+            }
+        });
+        
+        
+        $('#diagnosisForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            
+            if (selectedSymptoms.length === 0) {
+                alert('Please select at least one symptom.');
+                return;
+            }
+            
+            
+            $('#step2-content').hide();
+            $('#loading').show();
+            
+            
+                    const formData = {
+                        gender: $('#gender').val(),
+                birth_year: parseInt($('#birthYear').val()),
+                symptom_ids: selectedSymptoms.map(s => parseInt(s.id)),
+                symptom_names: selectedSymptoms.map(s => s.text)
+            };
+            
+            
+                    fetch('/api/diagnose', {
+                        method: 'POST',
+                        headers: {
+                    'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                    
+                        $('#loading').hide();
+                    
+                    
+                    displayResults(data);
+                    
+                    
+                    currentStep = 3;
+                    updateProgress(currentStep);
+                    })
+                    .catch(error => {
+                    console.error('Error getting diagnosis:', error);
+                        $('#loading').hide();
+                    $('#step2-content').show();
+                    alert('An error occurred while processing your diagnosis. Please try again later.');
+                    });
+                });
+
+        
+        function displayResults(results) {
+            const container = $('#result');
+            container.empty();
+            container.show();
+            
+            if (results && results.length > 0) {
+                
+                container.append(`
+                    <button id="backToSymptoms" class="secondary-button" style="margin-bottom: 1.5rem;">
+                        <i class="fas fa-arrow-left"></i> Back to symptoms
+                    </button>
+                `);
+                
+                
+                container.append(`<h3 style="margin-bottom: 1.5rem;">Found ${results.length} potential diagnosis results</h3>`);
+                
+                
+                results.forEach((result, index) => {
+                    
+                    let specializationsHtml = '';
+                    if (result.Specialisation && result.Specialisation.length > 0) {
+                        specializationsHtml = `
+                            <div class="specialization-list">
+                                ${result.Specialisation.map(spec => `
+                                    <div class="specialization-tag">${spec.Name}</div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+                    
+                    const resultHtml = `
+                        <div class="diagnosis-result">
+                            <h3><i class="fas fa-stethoscope"></i> ${result.Issue.Name}</h3>
+                            
+                            <div class="result-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Accuracy</div>
+                                    <div class="detail-value">${result.Issue.Accuracy}%</div>
+                                    <div class="accuracy-bar-container">
+                                        <div class="accuracy-bar" style="width: ${result.Issue.Accuracy}%;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <div class="detail-label">Medical Name</div>
+                                    <div class="detail-value">${result.Issue.ProfName || result.Issue.Name}</div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <div class="detail-label">Recommended Specialists</div>
+                                    ${specializationsHtml || '<div class="detail-value">No specific specialists recommended</div>'}
+                                </div>
+                            </div>
+                            
+                            <button class="info-button" data-issue-id="${result.Issue.ID}" 
+                                    style="margin-top: 15px; background: var(--button-bg); border: none; padding: 10px 20px; 
+                                    border-radius: 8px; color: var(--button-text); font-weight: 500; cursor: pointer; 
+                                    display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
+                                <i class="fas fa-info-circle"></i>
+                                Learn More About This Condition
+                            </button>
+                        </div>
+                    `;
+                    
+                    container.append(resultHtml);
+                });
+                
+                
+                $('.info-button').on('click', function() {
+                    const issueId = $(this).data('issue-id');
+                    showConditionInfo(issueId);
+                });
+                
+                
+                container.append(`
+                    <div class="disclaimer" style="margin-top: 2rem; padding: 1rem; background: var(--body-location-bg); border-radius: 8px; border-left: 5px solid #f59e0b;">
+                        <h4 style="color: #f59e0b; margin-top: 0;"><i class="fas fa-exclamation-circle"></i> Important Disclaimer</h4>
+                        <p style="color: var(--text-color);">These results are for informational purposes only and do not constitute a medical diagnosis. Please consult a healthcare provider for proper assessment.</p>
+                    </div>
+                `);
+                
+                
+                $('#backToSymptoms').on('click', function() {
+                    $('#result').hide().empty();
+                    $('#step2-content').show();
+                    currentStep = 2;
+                    updateProgress(currentStep);
+                });
+                
+                
+                $('.close-modal').on('click', function() {
+                    $('#conditionInfoModal').fadeOut(300);
+                });
+                
+                $(window).on('click', function(event) {
+                    if (event.target == document.getElementById('conditionInfoModal')) {
+                        $('#conditionInfoModal').fadeOut(300);
+                    }
+                });
+            } else {
+                
+                container.html(`
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>No diagnosis found</h3>
+                        <p>We couldn't find a diagnosis matching your symptoms. Please try selecting different symptoms or consult with a healthcare professional.</p>
+                        
+                        <button id="backToSymptoms" class="secondary-button" style="margin-top: 1.5rem;">
+                            <i class="fas fa-arrow-left"></i> Back to symptoms
+                        </button>
+                    </div>
+                `);
+                
+                
+                $('#backToSymptoms').on('click', function() {
+                    $('#result').hide().empty();
+                    $('#step2-content').show();
+                    currentStep = 2;
+                    updateProgress(currentStep);
+                });
+            }
+        }
+        
+        
+        function updateSuggestedSymptoms() {
+            if (selectedSymptoms.length > 0) {
+                fetchSuggestedSymptoms();
+            }
+        }
+
+        
+        function showConditionInfo(issueId) {
+            console.log("Showing condition info for ID:", issueId);
+            
+            
+            $('#conditionInfoContent').html(`
+                <div style="text-align: center; padding: 40px; color: var(--text-color);">
+                    <div class="loader" style="margin: 0 auto 20px;"></div>
+                    <p>Loading condition information...</p>
+                </div>
+            `);
+            
+            
+            $('#conditionInfoModal').fadeIn(300);
+            
+            
+            fetch(`/api/illness-info/${issueId}`)
+                .then(response => {
+                    console.log("API response status:", response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Received condition data:", data);
+                    const content = `
+                        <h2 style="color: var(--button-bg); margin-bottom: 20px; font-size: 1.5rem;">
+                            <i class="fas fa-book-medical"></i> ${data.Name}
+                        </h2>
+                        
+                        ${data.Description ? `
+                            <div class="info-section" style="margin-bottom: 20px;">
+                                <h3 style="color: var(--button-bg); margin-bottom: 10px; font-size: 1.2rem;">
+                                    <i class="fas fa-info-circle"></i> Description
+                                </h3>
+                                <p style="line-height: 1.6; color: var(--text-color);">${data.Description}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.MedicalCondition ? `
+                            <div class="info-section" style="margin-bottom: 20px;">
+                                <h3 style="color: var(--button-bg); margin-bottom: 10px; font-size: 1.2rem;">
+                                    <i class="fas fa-clipboard-list"></i> Medical Details
+                                </h3>
+                                <p style="line-height: 1.6; color: var(--text-color);">${data.MedicalCondition}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.TreatmentDescription ? `
+                            <div class="info-section" style="margin-bottom: 20px;">
+                                <h3 style="color: var(--button-bg); margin-bottom: 10px; font-size: 1.2rem;">
+                                    <i class="fas fa-hand-holding-medical"></i> Treatment
+                                </h3>
+                                <p style="line-height: 1.6; color: var(--text-color);">${data.TreatmentDescription}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.PossibleSymptoms ? `
+                            <div class="info-section">
+                                <h3 style="color: var(--button-bg); margin-bottom: 10px; font-size: 1.2rem;">
+                                    <i class="fas fa-list-ul"></i> Possible Symptoms
+                                </h3>
+                                <p style="line-height: 1.6; color: var(--text-color);">${data.PossibleSymptoms}</p>
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    $('#conditionInfoContent').html(content);
+                })
+                .catch(error => {
+                    console.error('Error fetching condition info:', error);
+                    $('#conditionInfoContent').html(`
+                        <div style="text-align: center; padding: 20px; color: #ef4444;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <p>Sorry, we couldn't load the information. Please try again later.</p>
+                            <p>Error details: ${error.message}</p>
+                        </div>
+                    `);
+                });
+        }
+            });
+        </script>
+    {% endblock %}
+
+
+<div id="conditionInfoModal" class="modal" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto; color: var(--text-color);">
+    <div class="modal-content" style="background-color: var(--container-bg); margin: 5% auto; padding: 20px; width: 90%; max-width: 800px; border-radius: 12px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        <span class="close-modal" style="position: absolute; right: 20px; top: 20px; font-size: 28px; font-weight: bold; cursor: pointer; color: var(--text-color);">&times;</span>
+        <div id="conditionInfoContent" style="margin-top: 20px;">
+            
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

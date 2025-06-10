@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Heart Disease Prediction{% endblock %}
+
+{% block style %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/disease-pages.css') }}">
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+{% endblock %}
+
+{% block content %}
+  <div class="heart-card">
+    <h1>Heart Disease Prediction</h1>
+    <p class="subtitle">Enter patient details to predict heart disease risk</p>
+    <form id="predictionForm" class="heart-form">
+      <div class="heart-form-group">
+        <label for="age">Age (years):</label>
+        <input type="number" id="age" name="age" min="1" max="120" required>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="sex">Gender: <span class="heart-help-icon" data-tippy-content="Select the patient's gender: Male or Female">?</span></label>
+        <select id="sex" name="sex" required>
+          <option value="" selected disabled>Select</option>
+          <option value="1">Male</option>
+          <option value="0">Female</option>
+        </select>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="cp">Chest Pain Type: <span class="heart-help-icon" data-tippy-content="Type of chest pain: Typical Angina (heart-related chest pain), Atypical Angina (less typical symptoms), Non-Anginal Pain (not heart-related), Asymptomatic (no pain)">?</span></label>
+        <select id="cp" name="cp" required>
+          <option value="" selected disabled>Select</option>
+          <option value="1">Typical Angina</option>
+          <option value="2">Atypical Angina</option>
+          <option value="3">Non-Anginal Pain</option>
+          <option value="4">Asymptomatic</option>
+        </select>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="trestbps">Blood Pressure (mm Hg): <span class="heart-help-icon" data-tippy-content="Resting blood pressure in mm Hg upon admission (normal range: 90-120, input range: 50-250)">?</span></label>
+        <input type="number" id="trestbps" name="trestbps" min="50" max="250" required>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="chol">Cholesterol (mg/dl): <span class="heart-help-icon" data-tippy-content="Total serum cholesterol in mg/dl (normal < 200, borderline 200-239, high ≥ 240, input range: 50-600)">?</span></label>
+        <input type="number" id="chol" name="chol" min="50" max="600" required>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="fbs">Fasting Blood Sugar > 120 mg/dl: <span class="heart-help-icon" data-tippy-content="Indicates if fasting blood sugar exceeds 120 mg/dl: True (possible diabetes), False (normal)">?</span></label>
+        <select id="fbs" name="fbs" required>
+          <option value="" selected disabled>Select</option>
+          <option value="1">True</option>
+          <option value="0">False</option>
+        </select>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="restecg">EKG Results: <span class="heart-help-icon" data-tippy-content="Resting electrocardiogram results: Normal, ST-T Wave Abnormality (possible heart strain), Left Ventricular Hypertrophy (enlarged heart muscle)">?</span></label>
+        <select id="restecg" name="restecg" required>
+          <option value="" selected disabled>Select</option>
+          <option value="0">Normal</option>
+          <option value="1">ST-T Wave Abnormality</option>
+          <option value="2">Left Ventricular Hypertrophy</option>
+        </select>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="thalach">Maximum Heart Rate: <span class="heart-help-icon" data-tippy-content="Highest heart rate achieved during exercise in beats per minute (typical range: 60-200, input range: 50-250)">?</span></label>
+        <input type="number" id="thalach" name="thalach" min="50" max="250" required>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="exang">Exercise Induced Angina: <span class="heart-help-icon" data-tippy-content="Chest pain triggered by exercise: Yes (possible heart issue), No (normal response)">?</span></label>
+        <select id="exang" name="exang" required>
+          <option value="" selected disabled>Select</option>
+          <option value="1">Yes</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="oldpeak">ST Depression: <span class="heart-help-icon" data-tippy-content="ST segment depression during exercise compared to rest in mm (0-10, higher values suggest heart stress)">?</span></label>
+        <input type="number" step="0.1" id="oldpeak" name="oldpeak" min="0" max="10" required>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="slope">Slope of ST Segment: <span class="heart-help-icon" data-tippy-content="Shape of ST segment during peak exercise: Upsloping (normal), Flat (possible issue), Downsloping (significant heart stress)">?</span></label>
+        <select id="slope" name="slope" required>
+          <option value="" selected disabled>Select</option>
+          <option value="1">Upsloping</option>
+          <option value="2">Flat</option>
+          <option value="3">Downsloping</option>
+        </select>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="ca">Number of Vessels (0-3): <span class="heart-help-icon" data-tippy-content="Number of major coronary vessels visible via fluoroscopy (0-3); higher numbers indicate more blockages">?</span></label>
+        <input type="number" id="ca" name="ca" min="0" max="3" required>
+      </div>
+
+      <div class="heart-form-group">
+        <label for="thal">Thallium Scan Result: <span class="heart-help-icon" data-tippy-content="Heart imaging test result: Normal (good blood flow), Fixed Defect (permanent damage), Reversible Defect (temporary issue)">?</span></label>
+        <select id="thal" name="thal" required>
+          <option value="" selected disabled>Select</option>
+          <option value="3">Normal</option>
+          <option value="6">Fixed Defect</option>
+          <option value="7">Reversible Defect</option>
+        </select>
+      </div>
+
+      <button type="submit"><i class="fas fa-heartbeat"></i> Predict</button>
+    </form>
+  </div>
+
+  
+  <div id="resultModal" class="modal">
+    <div id="modalContent" class="modal-content">
+      <button id="closeModal" class="close-btn">×</button>
+      <div id="modalResult" class="modal-result"></div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="https://unpkg.com/tippy.js@6"></script>
+  <script>
+    
+    tippy('.heart-help-icon', {
+      content: (reference) => reference.getAttribute('data-tippy-content'),
+      placement: 'top',
+      maxWidth: 300,
+      theme: 'dark',
+      arrow: true,
+      offset: [0, 10],
+      boundary: 'viewport',
+    });
+
+    
+    const sexMap = { '1': 'Male', '0': 'Female' };
+    const cpMap = { '1': 'Typical Angina', '2': 'Atypical Angina', '3': 'Non-Anginal Pain', '4': 'Asymptomatic' };
+    const fbsMap = { '1': 'True', '0': 'False' };
+    const restecgMap = { '0': 'Normal', '1': 'ST-T Wave Abnormality', '2': 'Left Ventricular Hypertrophy' };
+    const exangMap = { '1': 'Yes', '0': 'No' };
+    const slopeMap = { '1': 'Upsloping', '2': 'Flat', '3': 'Downsloping' };
+    const thalMap = { '3': 'Normal', '6': 'Fixed Defect', '7': 'Reversible Defect' };
+
+    document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        age: document.getElementById('age').value,
+        sex: document.getElementById('sex').value,
+        cp: document.getElementById('cp').value,
+        trestbps: document.getElementById('trestbps').value,
+        chol: document.getElementById('chol').value,
+        fbs: document.getElementById('fbs').value,
+        restecg: document.getElementById('restecg').value,
+        thalach: document.getElementById('thalach').value,
+        exang: document.getElementById('exang').value,
+        oldpeak: document.getElementById('oldpeak').value,
+        slope: document.getElementById('slope').value,
+        ca: document.getElementById('ca').value,
+        thal: document.getElementById('thal').value
+      };
+
+      
+      const modal = document.getElementById('resultModal');
+      const modalContent = document.getElementById('modalContent');
+      const modalResult = document.getElementById('modalResult');
+      
+      modalResult.innerHTML = '<div class="loader"></div><p class="clarify">Processing your data...</p>';
+      modalContent.className = 'modal-content';
+      modal.style.display = 'flex';
+
+      try {
+        const response = await fetch('/heart_predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        const data = await response.json();
+        const prediction = data.prediction === 1 ? 'Presence' : 'Absence';
+
+        
+        let iconHtml = '';
+        let clarifyMsg = '';
+        if (data.prediction === 1) {
+          iconHtml = '<span class="result-icon error"><i class="fas fa-exclamation-triangle"></i></span>';
+          clarifyMsg = 'High risk detected. Please consult your doctor.';
+        } else {
+          iconHtml = '<span class="result-icon success"><i class="fas fa-heartbeat"></i></span>';
+          clarifyMsg = 'No significant risk detected. Stay healthy!';
+        }
+
+        modalResult.innerHTML = `
+          ${iconHtml}
+          <p class="main-result">Prediction: ${prediction} of Heart Disease</p>
+          <p class="clarify">${clarifyMsg}</p>
+          <table class="result-table">
+            <tr><th>Field</th><th>Value</th></tr>
+            <tr><td>Age</td><td>${formData.age} years</td></tr>
+            <tr><td>Sex</td><td>${sexMap[formData.sex]}</td></tr>
+            <tr><td>Chest Pain Type</td><td>${cpMap[formData.cp]}</td></tr>
+            <tr><td>Blood Pressure</td><td>${formData.trestbps} mm Hg</td></tr>
+            <tr><td>Cholesterol</td><td>${formData.chol} mg/dl</td></tr>
+            <tr><td>Fasting Blood Sugar > 120 mg/dl</td><td>${fbsMap[formData.fbs]}</td></tr>
+            <tr><td>EKG Results</td><td>${restecgMap[formData.restecg]}</td></tr>
+            <tr><td>Maximum Heart Rate</td><td>${formData.thalach} bpm</td></tr>
+            <tr><td>Exercise Induced Angina</td><td>${exangMap[formData.exang]}</td></tr>
+            <tr><td>ST Depression</td><td>${formData.oldpeak} mm</td></tr>
+            <tr><td>Slope of ST Segment</td><td>${slopeMap[formData.slope]}</td></tr>
+            <tr><td>Number of Vessels</td><td>${formData.ca}</td></tr>
+            <tr><td>Thallium Scan Result</td><td>${thalMap[formData.thal]}</td></tr>
+          </table>
+        `;
+        modalContent.className = 'modal-content ' + (data.prediction === 1 ? 'error' : 'success');
+      } catch (error) {
+        modalResult.innerHTML = `
+          <span class="result-icon error"><i class="fas fa-times-circle"></i></span>
+          <p class="main-result">Error Occurred</p>
+          <p class="clarify">Could not get prediction. Please try again later.</p>
+        `;
+        modalContent.className = 'modal-content error';
+        console.error(error);
+      }
+    });
+
+    
+    const modal = document.getElementById('resultModal');
+    const closeBtn = document.getElementById('closeModal');
+
+    closeBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  </script>
+{% endblock %}

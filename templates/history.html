@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 2.5rem auto;
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .page-header {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2.1rem;
+        color: var(--heading-color);
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        font-weight: bold;
+    }
+
+    .filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-group select {
+        padding: 0.5rem;
+        border: 2px solid var(--select-border);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        background-color: var(--select-bg);
+        color: var(--select-text);
+    }
+
+    .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+        width: 100%;
+        align-items: center;
+    }
+
+    .history-item {
+        background: var(--record-bg);
+        border-radius: 18px;
+        box-shadow: 0 4px 18px var(--record-shadow);
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s, background 0.3s;
+        border: 1.5px solid var(--record-border);
+        width: 100%;
+        max-width: 850px;
+        margin: 0 auto;
+        animation: fadeInUp 0.7s cubic-bezier(.39,.575,.56,1) both;
+        position: relative;
+    }
+
+    .history-item:not(:last-child)::after {
+        content: '';
+        display: block;
+        position: absolute;
+        left: 50%;
+        bottom: -22px;
+        transform: translateX(-50%);
+        width: 70%;
+        height: 1.5px;
+        background: var(--hr-color);
+        opacity: 0.7;
+        border-radius: 2px;
+    }
+
+    .history-item:hover {
+        box-shadow: 0 8px 32px var(--record-shadow);
+        background: var(--record-bg);
+        transform: translateY(-3px) scale(1.012);
+    }
+
+    .history-header {
+        background: none;
+        padding: 0;
+        display: flex;
+        align-items: flex-start;
+        border-bottom: none;
+        margin-bottom: 0.7rem;
+        gap: 1.2rem;
+        justify-content: flex-start;
+        position: relative;
+    }
+
+    .date-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: var(--badge-bg);
+        color: var(--badge-text);
+        border-radius: 10px;
+        padding: 7px 18px 7px 14px;
+        font-size: 1.08rem;
+        font-weight: 700;
+        box-shadow: 0 2px 8px var(--record-shadow);
+        border: 1.5px solid var(--badge-border);
+        margin-top: 18px;
+        margin-bottom: 8px;
+        min-width: 140px;
+        max-width: 220px;
+    }
+
+    .date-badge i {
+        font-size: 1.25rem;
+        color: var(--badge-icon);
+        margin-right: 2px;
+    }
+
+    .date-badge .date-main {
+        font-size: 1.08rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        margin-bottom: 0px;
+        text-align: left;
+        display: inline-block;
+    }
+
+    .date-badge .date-time {
+        font-size: 0.97rem;
+        font-weight: 500;
+        color: var(--badge-text);
+        opacity: 0.8;
+        margin-left: 8px;
+        text-align: left;
+        display: inline-block;
+    }
+
+    .diagnosis-name {
+        color: var(--diagnosis-name-color);
+        font-weight: 800;
+        font-size: 1.18rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        letter-spacing: 0.01em;
+        text-shadow: 0 1px 2px var(--diagnosis-name-shadow);
+    }
+
+    .diagnosis-name i {
+        color: var(--diagnosis-icon-color);
+        font-size: 1.2rem;
+    }
+
+    .history-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-button {
+        padding: 0.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .view-button {
+        background: var(--button-bg);
+        color: var(--button-text);
+    }
+
+    .view-button:hover {
+        background: var(--button-hover-bg);
+    }
+
+    .delete-button {
+        background: var(--delete-button-bg);
+        color: var(--delete-button-text);
+    }
+
+    .delete-button:hover {
+        background: var(--delete-button-hover-bg);
+    }
+
+    .history-content {
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+
+    .patient-info {
+        display: flex;
+        gap: 2.5rem;
+        margin-bottom: 1.2rem;
+        flex-wrap: wrap;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        color: var(--text-color);
+    }
+
+    .info-label {
+        color: var(--record-heading);
+        font-weight: 600;
+    }
+
+    .symptoms-section {
+        margin-bottom: 1.2rem;
+    }
+
+    .section-title {
+        font-size: 1.15rem;
+        font-weight: bold;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        color: var(--record-heading);
+    }
+
+    .symptoms-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .symptom-tag {
+        background: var(--badge-bg);
+        color: var(--badge-text);
+        padding: 0.35rem 1rem;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        box-shadow: 0 1px 3px var(--record-shadow);
+        transition: background 0.2s, color 0.3s;
+        border: 1px solid var(--badge-border);
+    }
+
+    .symptom-tag:hover {
+        background: var(--select-bg);
+    }
+
+    .diagnosis-section {
+        margin-top: 1.5rem;
+    }
+
+    .diagnosis-item {
+        background: var(--record-bg);
+        border-radius: 12px;
+        padding: 1.2rem 1.2rem 1rem 1.2rem;
+        margin-bottom: 1.2rem;
+        border-left: 5px solid var(--record-heading);
+        box-shadow: 0 2px 8px var(--record-shadow);
+        transition: border-color 0.2s, background 0.3s;
+    }
+
+    .diagnosis-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .accuracy-badge {
+        background: var(--badge-bg);
+        color: var(--badge-text);
+        padding: 0.3rem 1.1rem;
+        border-radius: 15px;
+        font-size: 1rem;
+        font-weight: 700;
+        box-shadow: 0 1px 3px var(--record-shadow);
+        border: 1px solid var(--badge-border);
+    }
+
+    .diagnosis-details {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .diagnosis-detail {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--record-text);
+        opacity: 0.7;
+        min-width: 120px;
+    }
+
+    .specializations {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .specialization-tag {
+        background: var(--badge-bg);
+        color: var(--badge-text);
+        padding: 0.3rem 0.9rem;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        box-shadow: 0 1px 3px var(--record-shadow);
+        border: 1px solid var(--badge-border);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3.5rem 1rem;
+        color: var(--record-heading);
+        background: var(--record-bg);
+        border-radius: 18px;
+        margin-top: 2.5rem;
+        box-shadow: 0 2px 8px var(--record-shadow);
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        border: 1.5px solid var(--record-border);
+    }
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: var(--badge-border);
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: var(--record-heading);
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        color: var(--text-color);
+    }
+
+    .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        background: var(--badge-bg);
+        border-radius: 12px;
+        padding: 0.7rem 1.2rem;
+        box-shadow: 0 2px 8px var(--record-shadow);
+        min-width: 270px;
+        margin-bottom: 2.2rem;
+        position: static;
+        width: fit-content;
+        float: none;
+        align-self: center;
+        border: 1px solid var(--badge-border);
+    }
+    @media (max-width: 900px) {
+        .container {
+            padding: 1rem;
+        }
+        .history-item {
+            max-width: 100%;
+        }
+    }
+    .filter-bar label {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--label-color);
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .filter-bar select {
+        padding: 0.35rem 1.2rem 0.35rem 2.1rem;
+        border: 1.5px solid var(--select-border);
+        border-radius: 7px;
+        font-size: 1rem;
+        background: var(--select-bg) url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/calendar-date.svg') no-repeat 7px center/18px 18px;
+        color: var(--select-text);
+        font-weight: 500;
+        min-width: 90px;
+        outline: none;
+        transition: border 0.2s;
+    }
+    .filter-bar select:focus {
+        border: 1.5px solid var(--button-bg);
+    }
+    .filter-bar button {
+        padding: 0.35rem 1.1rem;
+        font-size: 1rem;
+        color: var(--button-text);
+        background: var(--button-bg);
+        border: none;
+        border-radius: 7px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 1px 3px var(--record-shadow);
+    }
+    .filter-bar button:hover {
+        background: var(--button-hover-bg);
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block title %}Diagnosis History{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('history_page') }}" style="display: flex; align-items: center; gap: 0.7rem; width: 100%;">
+            <label for="filterDate"><i class="fas fa-calendar-alt"></i> Filter by Date:</label>
+        <select name="filter_date" id="filterDate">
+            <option value="all" {% if selected_date == 'all' %}selected{% endif %}>All</option>
+            {% for date in dates %}
+                <option value="{{ date }}" {% if selected_date == date %}selected{% endif %}>{{ date }}</option>
+            {% endfor %}
+        </select>
+            <button type="submit">
+                <i class="fas fa-filter"></i>
+                Filter
+            </button>
+    </form>
+    </div>
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-history"></i>
+            Diagnosis History
+        </h1>
+    </div>
+
+    <div class="history-list">
+    {% if records %}
+        {% for record in records %}
+                <div class="history-item">
+                    <div class="history-header">
+                        <div class="date-badge">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span class="date-main">{{ record.diagnosis_date.strftime('%d-%m-%Y') }}</span>
+                            <span class="date-time">{{ record.diagnosis_date.strftime('%H:%M') }}</span>
+                        </div>
+                    </div>
+                    <div class="history-content">
+                        <div class="patient-info">
+                            <div class="info-item">
+                                <i class="fas fa-user"></i>
+                                <span class="info-label">Gender:</span>
+                                <span>{{ record.gender }}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-birthday-cake"></i>
+                                <span class="info-label">Birth Year:</span>
+                                <span>{{ record.birth_year }}</span>
+                            </div>
+                        </div>
+
+                        <div class="symptoms-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-list"></i>
+                                Symptoms
+                            </h3>
+                            <div class="symptoms-list">
+                                {% for symptom in record.symptoms %}
+                                    <span class="symptom-tag">{{ symptom }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="diagnosis-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-stethoscope"></i>
+                                Diagnosis Results
+                            </h3>
+                            {% for diag in record.diagnosis %}
+                                <div class="diagnosis-item">
+                                    <div class="diagnosis-header">
+                                        <div class="diagnosis-name">
+                                            <i class="fas fa-notes-medical"></i>
+                                            {{ diag.Issue.Name }}
+                                        </div>
+                                        <span class="accuracy-badge">
+                                            {{ diag.Issue.Accuracy|round|int }}%
+                                        </span>
+                                    </div>
+                                    <div class="diagnosis-details">
+                                        <div class="diagnosis-detail">
+                                            <span class="detail-label">Medical Name:</span>
+                                            <span>{{ diag.Issue.ProfName }}</span>
+                                        </div>
+                                        <div class="diagnosis-detail">
+                                            <span class="detail-label">ICD Code:</span>
+                                            <span>{{ diag.Issue.Icd }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="specializations">
+                                        <span class="detail-label" style="margin-right: 0.5rem; color: var(--record-heading); font-weight: 600;"><i class="fas fa-user-md"></i> Specializations:</span>
+                                        {% for spec in diag.Specialisation %}
+                                            <span class="specialization-tag">{{ spec.Name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                    {% endfor %}
+                        </div>
+                    </div>
+            </div>
+        {% endfor %}
+    {% else %}
+            <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <h3>No Diagnosis History</h3>
+                <p>Your diagnosis history will appear here. Start a new diagnosis to see your results!</p>
+            </div>
+    {% endif %}
+    </div>
+</div>
+{% endblock %}
+
