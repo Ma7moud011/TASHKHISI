@@ -26,7 +26,7 @@ See `requirements.txt` for all dependencies.
 - `test.py` : Main application file.
 - `templates/` : HTML templates.
 - `static/` : Static files (CSS, JS, images).
-- `AI models/` : AI models (not included in the repository).
+- `AI models/` : AI models (included in the repository).
 
 ## Database
 
