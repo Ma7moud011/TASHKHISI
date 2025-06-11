@@ -1,4 +1,4 @@
-# proj_test
+# TASHKHISI
 
 A medical web application built with Flask.
 
